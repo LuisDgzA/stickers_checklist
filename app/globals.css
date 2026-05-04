@@ -1,0 +1,133 @@
+@import "tailwindcss";
+
+/* ── Light theme (default) ─────────────────────────────── */
+:root {
+  --bg:             #f5f7fb;
+  --surface:        #ffffff;
+  --surface-soft:   #f0f4f8;
+  --surface-strong: #e8eef8;
+  --surface-hover:  #eef4ff;
+  --border:         #d7deea;
+  --border-hover:   #a9b7cc;
+  --text:           #101828;
+  --muted:          #667085;
+  --primary:        #d61f3c;
+  --primary-hover:  #bd1731;
+  --accent:         #008f7a;
+  --accent-hover:   #00a990;
+  --amber:          #b7791f;
+  --focus:          #12b8a6;
+  --hero-glow:      rgba(0 143 122 / 0.18);
+  --hero-glow-secondary: rgba(214 31 60 / 0.14);
+  --progress-glow:  rgba(0 143 122 / 0.35);
+
+  --sticker-missing-bg:      rgba(208 216 240 / 0.35);
+  --sticker-missing-border:  #cdd5f0;
+  --sticker-missing-text:    #6670a0;
+
+  --sticker-obtained-bg:     rgba(0 143 122 / 0.12);
+  --sticker-obtained-border: rgba(0 143 122 / 0.45);
+  --sticker-obtained-text:   #007a72;
+  --sticker-obtained-shadow: rgba(0 143 122 / 0.14);
+
+  --sticker-repeated-bg:     rgba(214 31 60 / 0.1);
+  --sticker-repeated-border: rgba(214 31 60 / 0.4);
+  --sticker-repeated-text:   #a01020;
+  --sticker-repeated-shadow: rgba(214 31 60 / 0.14);
+
+  --progress-track:          #d7deea;
+}
+
+/* ── Dark theme ────────────────────────────────────────── */
+.dark {
+  --bg:             #070b13;
+  --surface:        #0f1624;
+  --surface-soft:   #121b2b;
+  --surface-strong: #182235;
+  --surface-hover:  #162033;
+  --border:         #263247;
+  --border-hover:   #3a4962;
+  --text:           #f8fafc;
+  --muted:          #9aa7b8;
+  --primary:        #f43f5e;
+  --primary-hover:  #fb7185;
+  --accent:         #2dd4bf;
+  --accent-hover:   #5eead4;
+  --amber:          #f5a623;
+  --focus:          #5eead4;
+  --hero-glow:      rgba(45 212 191 / 0.16);
+  --hero-glow-secondary: rgba(244 63 94 / 0.14);
+  --progress-glow:  rgba(45 212 191 / 0.45);
+
+  --sticker-missing-bg:      rgba(10 15 46 / 0.7);
+  --sticker-missing-border:  #1e2550;
+  --sticker-missing-text:    #8891bb;
+
+  --sticker-obtained-bg:     rgba(0 80 74 / 0.25);
+  --sticker-obtained-border: rgba(0 196 180 / 0.4);
+  --sticker-obtained-text:   #00e0cc;
+  --sticker-obtained-shadow: rgba(45 212 191 / 0.18);
+
+  --sticker-repeated-bg:     rgba(100 10 20 / 0.25);
+  --sticker-repeated-border: rgba(232 37 61 / 0.4);
+  --sticker-repeated-text:   #ff9aaa;
+  --sticker-repeated-shadow: rgba(244 63 94 / 0.18);
+
+  --progress-track:          #1e2550;
+}
+
+@layer utilities {
+  .sticker-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border-radius: 1rem;
+    border-width: 1px;
+    cursor: pointer;
+    user-select: none;
+    transition-property: all;
+    transition-duration: 200ms;
+    transition-timing-function: ease;
+  }
+  .sticker-card:hover {
+    transform: translateY(-2px);
+  }
+  .sticker-missing {
+    border-color: var(--sticker-missing-border);
+    background-color: var(--sticker-missing-bg);
+    color: var(--sticker-missing-text);
+  }
+  .sticker-obtained {
+    border-color: var(--sticker-obtained-border);
+    background-color: var(--sticker-obtained-bg);
+    color: var(--sticker-obtained-text);
+  }
+  .sticker-repeated {
+    border-color: var(--sticker-repeated-border);
+    background-color: var(--sticker-repeated-bg);
+    color: var(--sticker-repeated-text);
+  }
+  .progress-bar {
+    height: 0.625rem;
+    border-radius: 9999px;
+    background-color: var(--progress-track);
+    overflow: hidden;
+    box-shadow: inset 0 1px 2px rgb(0 0 0 / 0.08);
+  }
+  .progress-fill {
+    height: 100%;
+    border-radius: 9999px;
+    transition-property: all;
+    transition-duration: 500ms;
+    transition-timing-function: ease;
+  }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+}
