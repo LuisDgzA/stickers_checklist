@@ -13,7 +13,7 @@ export async function GET(request: Request) {
       const { data: { user } } = await supabase.auth.getUser()
       if (user) {
         const nickname = user.user_metadata?.nickname as string | undefined
-        await supabase.from('profiles').upsert({
+        await (supabase as any).from('profiles').upsert({
           id: user.id,
           email: user.email ?? null,
           full_name: user.user_metadata?.full_name ?? null,
