@@ -1,10 +1,11 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
+import { sanitizeRedirectPath } from '@/lib/auth-redirect'
 
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url)
   const code = searchParams.get('code')
-  const next = searchParams.get('next') ?? '/'
+  const next = sanitizeRedirectPath(searchParams.get('next'))
 
   if (code) {
     const supabase = await createClient()
@@ -13,6 +14,7 @@ export async function GET(request: Request) {
       const { data: { user } } = await supabase.auth.getUser()
       if (user) {
         const nickname = user.user_metadata?.nickname as string | undefined
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         await (supabase as any).from('profiles').upsert({
           id: user.id,
           email: user.email ?? null,

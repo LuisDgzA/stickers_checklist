@@ -81,7 +81,7 @@ export interface CollectionProgress {
   totalCountries: number
 }
 
-export type StickerFilter = 'all' | 'missing' | 'complete' | 'repeated'
+export type StickerFilter = 'all' | 'missing' | 'complete' | 'repeated' | 'special'
 
 export interface ShareLink {
   id: string

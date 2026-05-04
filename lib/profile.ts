@@ -18,6 +18,7 @@ export async function checkNicknameAvailable(nickname: string): Promise<boolean>
   if (takenCache.has(key)) return false
 
   const supabase = createClient()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data, error } = await (supabase as any).rpc('check_nickname_available', { p_nickname: nickname })
   if (error) return false
 

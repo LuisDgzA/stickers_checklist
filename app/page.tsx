@@ -6,42 +6,32 @@ import { AlbumGrid, type AlbumGridItem } from '@/components/collections/AlbumGri
 import { EmptyState } from '@/components/ui/EmptyState'
 import { SectionHeader } from '@/components/home/SectionHeader'
 import { ThemeToggle } from '@/components/ui/ThemeToggle'
+import { DEFAULT_DESCRIPTION, DEFAULT_TITLE, SITE_NAME, SITE_URL, collectionKeywords } from '@/lib/seo'
 import type { Metadata } from 'next'
 import Link from 'next/link'
-
-const siteUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://stickers-checklist.com'
 
 export async function generateMetadata(): Promise<Metadata> {
   const collections = await getCollections().catch(() => [])
   const featured = collections[0]
-  const title = 'stickers_checklist | Álbumes digitales, checklist y progreso de stickers'
-  const description = 'Crea, completa y comparte álbumes digitales de coleccionables. Sigue tu progreso del Mundial 2026 y comparte tu checklist con QR.'
 
   return {
-    title,
-    description,
-    keywords: [
-      'stickers checklist',
-      'álbum digital',
-      'checklist Mundial 2026',
-      'coleccionables',
-      'estampas',
-      'progreso de álbum',
-      'compartir álbum QR',
-    ],
-    alternates: { canonical: siteUrl },
+    title: { absolute: DEFAULT_TITLE },
+    description: DEFAULT_DESCRIPTION,
+    keywords: collectionKeywords(featured?.name),
+    alternates: { canonical: SITE_URL },
     openGraph: {
-      title,
-      description,
-      url: siteUrl,
-      siteName: 'stickers_checklist',
+      title: DEFAULT_TITLE,
+      description: DEFAULT_DESCRIPTION,
+      url: SITE_URL,
+      siteName: SITE_NAME,
       type: 'website',
+      locale: 'es_MX',
       images: featured?.cover_image_url ? [{ url: featured.cover_image_url, alt: featured.name }] : undefined,
     },
     twitter: {
       card: 'summary_large_image',
-      title,
-      description,
+      title: DEFAULT_TITLE,
+      description: DEFAULT_DESCRIPTION,
       images: featured?.cover_image_url ? [featured.cover_image_url] : undefined,
     },
   }
@@ -50,6 +40,16 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function HomePage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
+  const { data: profile } = user
+    ? await (
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      supabase as any
+    )
+      .from('profiles')
+      .select('nickname')
+      .eq('id', user.id)
+      .single()
+    : { data: null }
   const collections = await getCollections().catch(() => [])
   const albumItems: AlbumGridItem[] = await Promise.all(collections.map(async collection => {
     if (!user) return { collection }
@@ -58,6 +58,7 @@ export default async function HomePage() {
       const [countries, stickers, userStickersResult] = await Promise.all([
         getCountries(collection.id),
         getStickers(collection.id),
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (supabase as any).from('user_stickers').select('*').eq('user_id', user.id).eq('collection_id', collection.id),
       ])
       const stickersWithQuantity = mergeStickersWithQuantity(stickers, userStickersResult.data ?? [])
@@ -71,20 +72,41 @@ export default async function HomePage() {
 
   const jsonLd = {
     '@context': 'https://schema.org',
-    '@type': 'CollectionPage',
-    name: 'stickers_checklist',
-    description: 'Plataforma de álbumes digitales y checklists de stickers coleccionables.',
-    url: siteUrl,
-    mainEntity: {
-      '@type': 'ItemList',
-      itemListElement: collections.map((collection, index) => ({
-        '@type': 'ListItem',
-        position: index + 1,
-        url: `${siteUrl}/album/${collection.slug}`,
-        name: collection.name,
-        description: collection.description ?? undefined,
-      })),
-    },
+    '@graph': [
+      {
+        '@type': 'WebSite',
+        '@id': `${SITE_URL}#website`,
+        name: SITE_NAME,
+        url: SITE_URL,
+        description: DEFAULT_DESCRIPTION,
+        inLanguage: 'es-MX',
+      },
+      {
+        '@type': 'WebApplication',
+        '@id': `${SITE_URL}#app`,
+        name: SITE_NAME,
+        applicationCategory: 'LifestyleApplication',
+        operatingSystem: 'Web',
+        url: SITE_URL,
+        description: DEFAULT_DESCRIPTION,
+      },
+      {
+        '@type': 'CollectionPage',
+        name: SITE_NAME,
+        description: DEFAULT_DESCRIPTION,
+        url: SITE_URL,
+        mainEntity: {
+          '@type': 'ItemList',
+          itemListElement: collections.map((collection, index) => ({
+            '@type': 'ListItem',
+            position: index + 1,
+            url: `${SITE_URL}/album/${collection.slug}`,
+            name: collection.name,
+            description: collection.description ?? undefined,
+          })),
+        },
+      },
+    ],
   }
 
   return (
@@ -114,7 +136,13 @@ export default async function HomePage() {
             <ThemeToggle />
             {user ? (
               <>
-                <span className="hidden text-sm text-(--muted) sm:block">{user.email}</span>
+                <Link href="/logros?back=/" className="hidden rounded-xl border border-(--border) bg-(--surface) px-3 py-2 text-sm font-medium text-(--muted) transition hover:border-(--accent)/50 hover:text-(--text) sm:inline-flex">
+                  Logros
+                </Link>
+                <Link href="/perfil?back=/" className="hidden rounded-xl border border-(--border) bg-(--surface) px-3 py-2 text-sm font-medium text-(--muted) transition hover:border-(--accent)/50 hover:text-(--text) sm:inline-flex">
+                  Perfil
+                </Link>
+                <span className="hidden text-sm text-(--muted) sm:block">{profile?.nickname ? `@${profile.nickname}` : user.email}</span>
                 <form action="/auth/signout" method="post">
                   <button className="rounded-xl border border-(--border) bg-(--surface) px-3 py-2 text-sm font-medium text-(--muted) transition hover:border-(--primary)/50 hover:text-(--text) focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--focus)">
                     Cerrar sesión
