@@ -7,6 +7,8 @@ ALTER TABLE public.countries ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.stickers ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.user_stickers ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.share_links ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.achievements ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.user_achievements ENABLE ROW LEVEL SECURITY;
 
 -- profiles: each user reads/edits only their own profile
 CREATE POLICY "profiles_select_own" ON public.profiles FOR SELECT USING (auth.uid() = id);
@@ -53,3 +55,8 @@ CREATE POLICY "share_links_update_own" ON public.share_links FOR UPDATE USING (a
 -- share_links: public read by active token (for match page)
 CREATE POLICY "share_links_select_by_token" ON public.share_links
   FOR SELECT USING (is_active = true);
+
+-- achievements: public catalog, own user achievements
+CREATE POLICY "achievements_public_read" ON public.achievements FOR SELECT USING (true);
+CREATE POLICY "user_achievements_select_own" ON public.user_achievements FOR SELECT USING (auth.uid() = user_id);
+CREATE POLICY "user_achievements_insert_own" ON public.user_achievements FOR INSERT WITH CHECK (auth.uid() = user_id);

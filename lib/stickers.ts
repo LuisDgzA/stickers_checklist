@@ -1,8 +1,5 @@
 import { createClient } from '@/lib/supabase/client'
 import { enqueueUpdate, getPendingUpdates, removeUpdate } from '@/lib/offline-queue'
-import type { Database } from '@/types/database'
-
-type UserStickerUpsert = Database['public']['Tables']['user_stickers']['Insert']
 
 const MIN_QUANTITY = 0
 const MAX_QUANTITY = 1000

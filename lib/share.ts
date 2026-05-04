@@ -1,10 +1,6 @@
 import { createClient } from '@/lib/supabase/client'
 import { getStickers, mergeStickersWithQuantity } from '@/lib/collections'
 import type { ShareLink, StickerWithQuantity, MatchResult } from '@/types/album'
-import type { Database } from '@/types/database'
-
-type StickerRow = Database['public']['Tables']['stickers']['Row']
-type UserStickerRow = Database['public']['Tables']['user_stickers']['Row']
 
 function generateToken(): string {
   return crypto.randomUUID().replace(/-/g, '').slice(0, 16)

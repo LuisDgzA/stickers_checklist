@@ -21,6 +21,8 @@ self.addEventListener('fetch', (event) => {
   const { request } = event
   const url = new URL(request.url)
 
+  if (url.hostname === 'localhost' || url.hostname === '127.0.0.1') return
+
   // Solo GET y mismo origen
   if (request.method !== 'GET') return
   if (url.origin !== self.location.origin) return

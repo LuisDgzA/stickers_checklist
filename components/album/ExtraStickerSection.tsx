@@ -86,6 +86,8 @@ export function ExtraStickerSection({
       groups = groups.filter(g => Array.from(g.stickers.values()).every(s => s.quantity >= 1))
     } else if (filter === 'repeated') {
       groups = groups.filter(g => Array.from(g.stickers.values()).some(s => s.quantity > 1))
+    } else if (filter === 'special') {
+      groups = groups.filter(g => Array.from(g.stickers.values()).some(s => s.section_id && !s.country_id))
     }
 
     return groups
