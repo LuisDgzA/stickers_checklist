@@ -6,7 +6,7 @@ export function getOwnerNickname(userId: string): Promise<string | null> {
   return unstable_cache(
     async () => {
       const supabase = createClient()
-      const { data } = await supabase.rpc('get_user_nickname', { p_user_id: userId })
+      const { data } = await (supabase as any).rpc('get_user_nickname', { p_user_id: userId })
       return (data as string | null) ?? null
     },
     [`profile-nickname-${userId}`],

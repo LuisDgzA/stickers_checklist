@@ -19,7 +19,7 @@ const siteUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://stickers-checklist.c
 
 async function getSharedAlbum(token: string) {
   const supabase = await createClient()
-  const { data: shareLinkRaw } = await supabase
+  const { data: shareLinkRaw } = await (supabase as any)
     .from('share_links')
     .select('*')
     .eq('token', token)
@@ -29,7 +29,7 @@ async function getSharedAlbum(token: string) {
   const shareLink = shareLinkRaw as ShareLink | null
   if (!shareLink) return null
 
-  const { data: collectionRaw } = await supabase
+  const { data: collectionRaw } = await (supabase as any)
     .from('collections')
     .select('*')
     .eq('id', shareLink.collection_id)
@@ -42,7 +42,7 @@ async function getSharedAlbum(token: string) {
   const [countries, stickers, userStickersResult, ownerNickname] = await Promise.all([
     getCountries(collection.id),
     getStickers(collection.id),
-    supabase.from('user_stickers').select('*').eq('user_id', shareLink.user_id).eq('collection_id', collection.id),
+    (supabase as any).from('user_stickers').select('*').eq('user_id', shareLink.user_id).eq('collection_id', collection.id),
     getOwnerNickname(shareLink.user_id),
   ])
 
@@ -139,7 +139,7 @@ export default async function SharePage({ params }: PageProps) {
   const showMatch = user && user.id !== shareLink.user_id
   let matchResult = null
   if (showMatch) {
-    const visitorUserStickersResult = await supabase
+    const visitorUserStickersResult = await (supabase as any)
       .from('user_stickers')
       .select('*')
       .eq('user_id', user.id)

@@ -35,7 +35,7 @@ export default async function AlbumPage({ params }: PageProps) {
     getCountries(collection.id),
     getSections(collection.id),
     getStickers(collection.id),
-    supabase.from('user_stickers').select('sticker_id, quantity').eq('user_id', user.id).eq('collection_id', collection.id),
+    (supabase as any).from('user_stickers').select('sticker_id, quantity').eq('user_id', user.id).eq('collection_id', collection.id),
   ])
 
   const userStickers = userStickersResult.data ?? []

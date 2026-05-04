@@ -58,7 +58,7 @@ export default async function HomePage() {
       const [countries, stickers, userStickersResult] = await Promise.all([
         getCountries(collection.id),
         getStickers(collection.id),
-        supabase.from('user_stickers').select('*').eq('user_id', user.id).eq('collection_id', collection.id),
+        (supabase as any).from('user_stickers').select('*').eq('user_id', user.id).eq('collection_id', collection.id),
       ])
       const stickersWithQuantity = mergeStickersWithQuantity(stickers, userStickersResult.data ?? [])
       return { collection, progress: calcCollectionProgress(stickersWithQuantity, countries) }

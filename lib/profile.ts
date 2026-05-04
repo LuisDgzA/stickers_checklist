@@ -18,7 +18,7 @@ export async function checkNicknameAvailable(nickname: string): Promise<boolean>
   if (takenCache.has(key)) return false
 
   const supabase = createClient()
-  const { data, error } = await supabase.rpc('check_nickname_available', { p_nickname: nickname })
+  const { data, error } = await (supabase as any).rpc('check_nickname_available', { p_nickname: nickname })
   if (error) return false
 
   const available = data as boolean
