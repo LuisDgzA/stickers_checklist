@@ -178,12 +178,12 @@ export default async function HomePage() {
               <div className="mt-1 text-xs text-(--muted)">Colecciones</div>
             </div>
             <div>
-              <div className="text-2xl font-bold text-(--accent)">QR</div>
-              <div className="mt-1 text-xs text-(--muted)">Compartir</div>
+              <div className="text-2xl font-bold text-(--text)">QR</div>
+              <div className="mt-1 text-xs text-(--muted)">Comparte</div>
             </div>
             <div>
-              <div className="text-2xl font-bold text-(--primary)">2026</div>
-              <div className="mt-1 text-xs text-(--muted)">Mundial</div>
+              <div className="text-2xl font-bold text-(--text)">Progreso</div>
+              <div className="mt-1 text-xs text-(--muted)">por álbum</div>
             </div>
           </div>
         </section>

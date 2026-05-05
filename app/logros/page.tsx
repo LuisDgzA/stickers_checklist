@@ -4,6 +4,7 @@ import { createClient } from '@/lib/supabase/server'
 import { getCollections } from '@/lib/collections'
 import { ACHIEVEMENTS } from '@/lib/achievements'
 import { loginPathForRedirect, sanitizeRedirectPath } from '@/lib/auth-redirect'
+import { AchievementsAccordion } from '@/components/progress/AchievementsAccordion'
 import { ThemeToggle } from '@/components/ui/ThemeToggle'
 import type { Metadata } from 'next'
 
@@ -26,20 +27,46 @@ export default async function LogrosPage({ searchParams }: PageProps) {
   if (!user) redirect(loginPathForRedirect(`/logros?back=${encodeURIComponent(back)}`))
 
   const collections = await getCollections().catch(() => [])
-  const collection = collections.find(item => item.slug === params.collection) ?? collections[0] ?? null
-  const { data: unlockedRows } = collection
+  const { data: unlockedRows } = collections.length > 0
     ? await (
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       supabase as any
     )
       .from('user_achievements')
-      .select('achievement_code, unlocked_at')
+      .select('collection_id, achievement_code, unlocked_at')
       .eq('user_id', user.id)
-      .eq('collection_id', collection.id)
     : { data: [] }
 
-  const unlockedMap = new Map<string, string>((unlockedRows ?? []).map((row: { achievement_code: string; unlocked_at: string }) => [row.achievement_code, row.unlocked_at]))
-  const unlockedCount = ACHIEVEMENTS.filter(achievement => unlockedMap.has(achievement.code)).length
+  const unlockedByCollection = new Map<string, Map<string, string>>()
+
+  for (const row of (unlockedRows ?? []) as { collection_id: string; achievement_code: string; unlocked_at: string }[]) {
+    const collectionAchievements = unlockedByCollection.get(row.collection_id) ?? new Map<string, string>()
+    collectionAchievements.set(row.achievement_code, row.unlocked_at)
+    unlockedByCollection.set(row.collection_id, collectionAchievements)
+  }
+
+  const collectionItems = collections.map(collection => {
+    const unlockedMap = unlockedByCollection.get(collection.id) ?? new Map<string, string>()
+    const unlockedCount = ACHIEVEMENTS.filter(achievement => unlockedMap.has(achievement.code)).length
+    const progressPercentage = ACHIEVEMENTS.length > 0 ? Math.round((unlockedCount / ACHIEVEMENTS.length) * 100) : 0
+
+    return {
+      id: collection.id,
+      slug: collection.slug,
+      name: collection.name,
+      unlockedCount,
+      totalCount: ACHIEVEMENTS.length,
+      progressPercentage,
+      achievements: ACHIEVEMENTS.map(achievement => ({
+        code: achievement.code,
+        name: achievement.name,
+        description: achievement.description,
+        unlockedAt: unlockedMap.get(achievement.code) ?? null,
+      })),
+    }
+  })
+
+  const initialCollectionId = collectionItems.find(item => item.slug === params.collection)?.id ?? collectionItems[0]?.id ?? null
 
   return (
     <div className="min-h-screen bg-(--bg) text-(--text)">
@@ -57,52 +84,29 @@ export default async function LogrosPage({ searchParams }: PageProps) {
 
       <main className="mx-auto max-w-6xl space-y-6 px-4 py-8">
         <section className="rounded-3xl border border-(--border) bg-(--surface) p-6 shadow-sm">
-          <span className="text-xs font-semibold uppercase tracking-wide text-(--accent)">Logros</span>
-          <div className="mt-2 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
             <div>
               <h1 className="text-3xl font-bold tracking-tight text-(--text)">Tus logros</h1>
               <p className="mt-2 text-sm text-(--muted)">
-                {collection ? `${collection.name}: ${unlockedCount}/${ACHIEVEMENTS.length} desbloqueados` : 'No hay colecciones disponibles.'}
+                Revisa tu avance por colección y expande cada una para ver sus logros desbloqueados y pendientes.
               </p>
             </div>
-            <span className="w-fit rounded-full border border-(--accent)/30 bg-(--accent)/10 px-4 py-2 text-sm font-bold text-(--accent)">
-              {Math.round((unlockedCount / ACHIEVEMENTS.length) * 100)}%
+            <span className="w-fit rounded-full border border-(--border) bg-(--surface-soft) px-4 py-2 text-sm font-bold text-(--text)">
+              {collectionItems.length} {collectionItems.length === 1 ? 'colección' : 'colecciones'}
             </span>
           </div>
         </section>
 
-        <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {ACHIEVEMENTS.map(achievement => {
-            const unlockedAt = unlockedMap.get(achievement.code)
-            const unlocked = Boolean(unlockedAt)
-
-            return (
-              <article
-                key={achievement.code}
-                className={`rounded-3xl border p-5 shadow-sm transition ${
-                  unlocked
-                    ? 'border-(--accent)/35 bg-(--accent)/10'
-                    : 'border-(--border) bg-(--surface) opacity-75'
-                }`}
-              >
-                <div className="flex items-start gap-3">
-                  <div className={`grid size-12 shrink-0 place-items-center rounded-2xl ${unlocked ? 'bg-(--accent)/15 text-(--accent)' : 'bg-(--surface-soft) text-(--muted)'}`}>
-                    <svg className="size-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={unlocked ? 'M5 13l4 4L19 7' : 'M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2h-1V7a5 5 0 00-10 0v4H6a2 2 0 00-2 2v6a2 2 0 002 2zm3-10V7a3 3 0 016 0v4'} />
-                    </svg>
-                  </div>
-                  <div className="min-w-0">
-                    <h2 className="font-bold text-(--text)">{achievement.name}</h2>
-                    <p className="mt-1 text-sm leading-6 text-(--muted)">{achievement.description}</p>
-                    <p className="mt-3 text-xs font-semibold text-(--accent)">
-                      {unlockedAt ? `Desbloqueado ${new Date(unlockedAt).toLocaleDateString('es-MX')}` : 'Bloqueado'}
-                    </p>
-                  </div>
-                </div>
-              </article>
-            )
-          })}
-        </section>
+        {collectionItems.length === 0 ? (
+          <section className="rounded-3xl border border-dashed border-(--border) bg-(--surface-soft) px-6 py-14 text-center shadow-sm">
+            <h2 className="text-base font-semibold text-(--text)">No hay colecciones disponibles</h2>
+            <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-(--muted)">
+              Cuando agregues colecciones activas aparecerán aquí con sus logros correspondientes.
+            </p>
+          </section>
+        ) : (
+          <AchievementsAccordion items={collectionItems} initialCollectionId={initialCollectionId} />
+        )}
       </main>
     </div>
   )
