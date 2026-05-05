@@ -66,8 +66,7 @@ export function OfflineBanner() {
       }}
     >
       {!online && (
-        <>
-          <span style={{ fontSize: '15px' }}>⚡</span>
+        <>          
           Sin conexión — los cambios se guardarán al reconectar
         </>
       )}

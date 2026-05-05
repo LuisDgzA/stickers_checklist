@@ -43,16 +43,12 @@ export function StickerCard({ sticker, onIncrement, onDecrement, isUpdating }: S
         >
           −
         </button>
-      <div className="grid size-10 place-items-center rounded-2xl bg-(--surface-soft) ring-1 ring-inset ring-white/10 transition group-hover:scale-105">
-        {isObtained || isRepeated ? (
-          <svg className="size-5 text-(--accent)" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
-          </svg>
-        ) : (
-          <span className="size-4 rounded-full border-2 border-dashed border-current opacity-50" />
-        )}
+      <div className="flex w-max flex-1 items-center justify-center rounded-2xl bg-(--surface-soft) ring-1 ring-inset ring-white/10 transition group-hover:scale-105 px-4 py-2">
+        <span className="font-mono text-3xl font-bold leading-none tracking-tight">
+          {String(sticker.number).padStart(2, '0')}
+        </span>
       </div>
-      <span className="font-mono text-xs font-bold tracking-wide">{sticker.code}</span>
+      <span className="font-mono text-xs font-bold tracking-wide">{sticker.code.split('-')[0]}</span>
       {sticker.name && (
         <span className="line-clamp-2 px-1 text-center text-[11px] leading-tight opacity-75">{sticker.name}</span>
       )}
@@ -60,6 +56,14 @@ export function StickerCard({ sticker, onIncrement, onDecrement, isUpdating }: S
       <span className="mt-auto rounded-full border border-current/15 px-2 py-0.5 text-[10px] font-semibold opacity-75">
         {state === 'missing' ? 'Pendiente' : state === 'obtained' ? 'Obtenida' : 'Repetida'}
       </span>
+
+      {isObtained && (
+        <span className="absolute -right-1 -top-1 grid size-7 place-content-center rounded-full bg-(--accent) text-white shadow-lg shadow-(--accent)/30">
+          <svg className="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+          </svg>
+        </span>
+      )}
 
       {isRepeated && (
         <span className="absolute -right-1 -top-1 grid size-7 place-content-center rounded-full bg-(--primary) text-[10px] font-bold text-white shadow-lg shadow-(--primary)/30">
