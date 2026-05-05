@@ -1,10 +1,13 @@
 'use client'
 
+/* eslint-disable react-hooks/set-state-in-effect */
+
 import { useState, useEffect, useRef } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import { ThemeToggle } from '@/components/ui/ThemeToggle'
 import { validateNicknameFormat, checkNicknameAvailable } from '@/lib/profile'
+import { sanitizeRedirectPath } from '@/lib/auth-redirect'
 
 type NicknameStatus = 'idle' | 'checking' | 'available' | 'taken' | 'invalid'
 
@@ -18,7 +21,6 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState<{ text: string; type: 'error' | 'success' } | null>(null)
   const router = useRouter()
-  const supabase = createClient()
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   useEffect(() => {
@@ -54,13 +56,15 @@ export default function LoginPage() {
     e.preventDefault()
     setLoading(true)
     setMessage(null)
+    const supabase = createClient()
 
     if (mode === 'login') {
       const { error } = await supabase.auth.signInWithPassword({ email, password })
       if (error) {
         setMessage({ text: 'Correo o contraseña incorrectos.', type: 'error' })
       } else {
-        router.push('/')
+        const next = sanitizeRedirectPath(new URLSearchParams(window.location.search).get('next'))
+        router.push(next)
         router.refresh()
       }
     } else {

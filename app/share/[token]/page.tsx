@@ -6,6 +6,8 @@ import { calcCollectionProgress } from '@/lib/progress'
 import { getCountries, getStickers, mergeStickersWithQuantity } from '@/lib/collections'
 import { calcMatchResult } from '@/lib/share'
 import { getOwnerNickname } from '@/lib/profile.server'
+import { FLAG_ICONS } from '@/lib/flags'
+import { SITE_NAME, SITE_URL, collectionKeywords, truncateDescription } from '@/lib/seo'
 import { MatchClient } from './MatchClient'
 import type { Metadata } from 'next'
 import type { ShareLink, Collection, UserSticker } from '@/types/album'
@@ -15,10 +17,9 @@ interface PageProps {
   params: Promise<{ token: string }>
 }
 
-const siteUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://stickers-checklist.com'
-
 async function getSharedAlbum(token: string) {
   const supabase = await createClient()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: shareLinkRaw } = await (supabase as any)
     .from('share_links')
     .select('*')
@@ -29,6 +30,7 @@ async function getSharedAlbum(token: string) {
   const shareLink = shareLinkRaw as ShareLink | null
   if (!shareLink) return null
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: collectionRaw } = await (supabase as any)
     .from('collections')
     .select('*')
@@ -42,6 +44,7 @@ async function getSharedAlbum(token: string) {
   const [countries, stickers, userStickersResult, ownerNickname] = await Promise.all([
     getCountries(collection.id),
     getStickers(collection.id),
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (supabase as any).from('user_stickers').select('*').eq('user_id', shareLink.user_id).eq('collection_id', collection.id),
     getOwnerNickname(shareLink.user_id),
   ])
@@ -58,23 +61,35 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const shared = await getSharedAlbum(token)
   const ownerLabel = shared?.ownerNickname ? `@${shared.ownerNickname}` : null
   const title = shared
-    ? `${shared.collection.name}${ownerLabel ? ` de ${ownerLabel}` : ''} | stickers_checklist`
-    : 'Álbum compartido | stickers_checklist'
+    ? `Álbum de ${ownerLabel ?? 'coleccionista'}: ${shared.collection.name}`
+    : 'Álbum compartido'
   const description = shared
-    ? `Consulta el progreso público del álbum ${shared.collection.name}: ${shared.progress.percentage}% completado en modo solo lectura.`
+    ? truncateDescription(`Consulta el progreso público del álbum ${shared.collection.name}${ownerLabel ? ` de ${ownerLabel}` : ''}: ${shared.progress.percentage}% completado, ${shared.progress.missing} pendientes y ${shared.progress.duplicates} repetidas disponibles para intercambio.`)
     : 'Consulta un álbum digital compartido en stickers_checklist.'
-  const url = `${siteUrl}/share/${token}`
+  const url = `${SITE_URL}/share/${token}`
 
   return {
     title,
     description,
+    keywords: collectionKeywords(shared?.collection.name),
     alternates: { canonical: url },
+    robots: {
+      index: Boolean(shared),
+      follow: true,
+      googleBot: {
+        index: Boolean(shared),
+        follow: true,
+        'max-image-preview': 'large',
+        'max-snippet': -1,
+      },
+    },
     openGraph: {
       title,
       description,
       url,
-      siteName: 'stickers_checklist',
+      siteName: SITE_NAME,
       type: 'website',
+      locale: 'es_MX',
       images: shared?.collection.cover_image_url ? [{ url: shared.collection.cover_image_url, alt: shared.collection.name }] : undefined,
     },
     twitter: {
@@ -108,22 +123,40 @@ export default async function SharePage({ params }: PageProps) {
 
   const { shareLink, collection, countries, stickers, stickersWithQuantity, progress, ownerNickname } = shared
   const ownerLabel = ownerNickname ? `@${ownerNickname}` : 'Este coleccionista'
-  const shareUrl = `${siteUrl}/share/${token}`
+  const shareUrl = `${SITE_URL}/share/${token}`
   const countryMap = new Map(countries.map(country => [country.id, country]))
   const grouped = new Map<string, typeof stickersWithQuantity>()
+  const duplicateStickers = stickersWithQuantity.filter(sticker => sticker.quantity > 1)
+  const duplicateGroups = new Map<string, typeof duplicateStickers>()
   for (const sticker of stickersWithQuantity) {
     const key = sticker.country_id ?? 'other'
     const current = grouped.get(key) ?? []
     current.push(sticker)
     grouped.set(key, current)
   }
+  for (const sticker of duplicateStickers) {
+    const key = sticker.country_id ?? 'other'
+    const current = duplicateGroups.get(key) ?? []
+    current.push(sticker)
+    duplicateGroups.set(key, current)
+  }
 
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'CollectionPage',
-    name: `${collection.name} compartido`,
-    description: collection.description ?? `Progreso público de ${collection.name}`,
+    name: `Álbum de ${ownerLabel}: ${collection.name}`,
+    description: collection.description ?? `Progreso público de ${collection.name}: ${progress.percentage}% completado.`,
     url: shareUrl,
+    isAccessibleForFree: true,
+    inLanguage: 'es-MX',
+    about: {
+      '@type': 'CreativeWork',
+      name: collection.name,
+    },
+    creator: ownerNickname ? {
+      '@type': 'Person',
+      alternateName: ownerLabel,
+    } : undefined,
     mainEntity: {
       '@type': 'ItemList',
       numberOfItems: stickersWithQuantity.length,
@@ -139,6 +172,7 @@ export default async function SharePage({ params }: PageProps) {
   const showMatch = user && user.id !== shareLink.user_id
   let matchResult = null
   if (showMatch) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const visitorUserStickersResult = await (supabase as any)
       .from('user_stickers')
       .select('*')
@@ -179,7 +213,7 @@ export default async function SharePage({ params }: PageProps) {
                 </span>
               )}
             </div>
-            {ownerNickname && !user && (
+            {ownerNickname && (
               <p className="mt-4 text-lg font-semibold text-(--text)">
                 Álbum de <span className="text-(--accent)">{ownerLabel}</span>
               </p>
@@ -238,6 +272,63 @@ export default async function SharePage({ params }: PageProps) {
         )}
 
         <section>
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <h2 className="text-2xl font-bold tracking-tight text-(--text)">Duplicadas disponibles</h2>
+              <p className="mt-2 text-sm text-(--muted)">
+                {duplicateStickers.length > 0
+                  ? `${ownerLabel} tiene ${progress.duplicates} repetidas en ${duplicateStickers.length} estampas.`
+                  : `${ownerLabel} todavía no tiene estampas duplicadas.`}
+              </p>
+            </div>
+            <span className="w-fit rounded-full border border-(--accent)/30 bg-(--accent)/10 px-4 py-2 text-sm font-bold text-(--accent)">
+              {progress.duplicates} extras
+            </span>
+          </div>
+
+          {duplicateGroups.size > 0 ? (
+            <div className="mt-5 space-y-4">
+              {Array.from(duplicateGroups.entries()).map(([countryId, stickers]) => {
+                const country = countryMap.get(countryId)
+                return (
+                  <article key={countryId} className="rounded-3xl border border-(--accent)/25 bg-(--surface) p-5 shadow-sm">
+                    <div className="flex flex-wrap items-center justify-between gap-3">
+                      <h3 className="flex items-center gap-2 font-semibold text-(--text)">
+                        {country && FLAG_ICONS[country.code] && (
+                          <span className={`fi fi-${FLAG_ICONS[country.code]} text-xl`} aria-hidden="true" />
+                        )}
+                        <span>{country?.name ?? 'Sección especial'}</span>
+                      </h3>
+                      <span className="rounded-full border border-(--accent)/30 bg-(--accent)/10 px-3 py-1 text-xs font-semibold text-(--accent)">
+                        {stickers.reduce((total, sticker) => total + Math.max(0, sticker.quantity - 1), 0)} extras
+                      </span>
+                    </div>
+                    <div className="mt-4 flex flex-wrap gap-2">
+                      {stickers.map(sticker => (
+                        <span
+                          key={sticker.id}
+                          className="inline-flex items-center gap-2 rounded-xl border border-(--accent)/30 bg-(--accent)/10 px-3 py-2 text-xs font-semibold text-(--accent)"
+                        >
+                          <span className="font-mono">{sticker.code}</span>
+                          {sticker.name && <span className="max-w-36 truncate text-(--text)">{sticker.name}</span>}
+                          <span className="rounded-full bg-(--accent) px-2 py-0.5 text-[10px] font-bold text-white">
+                            x{sticker.quantity - 1}
+                          </span>
+                        </span>
+                      ))}
+                    </div>
+                  </article>
+                )
+              })}
+            </div>
+          ) : (
+            <div className="mt-5 rounded-3xl border border-dashed border-(--border) bg-(--surface) p-6 text-sm text-(--muted)">
+              Cuando marque repetidas, aparecerán aquí para facilitar intercambios.
+            </div>
+          )}
+        </section>
+
+        <section>
           <h2 className="text-2xl font-bold tracking-tight text-(--text)">Checklist visible</h2>
           <div className="mt-5 space-y-4">
             {Array.from(grouped.entries()).map(([countryId, stickers]) => {
@@ -246,7 +337,12 @@ export default async function SharePage({ params }: PageProps) {
               return (
                 <article key={countryId} className="rounded-3xl border border-(--border) bg-(--surface) p-5 shadow-sm">
                   <div className="flex flex-wrap items-center justify-between gap-3">
-                    <h3 className="font-semibold text-(--text)">{country?.name ?? 'Sección especial'}</h3>
+                    <h3 className="flex items-center gap-2 font-semibold text-(--text)">
+                      {country && FLAG_ICONS[country.code] && (
+                        <span className={`fi fi-${FLAG_ICONS[country.code]} text-xl`} aria-hidden="true" />
+                      )}
+                      <span>{country?.name ?? 'Sección especial'}</span>
+                    </h3>
                     <span className="rounded-full border border-(--border) bg-(--surface-soft) px-3 py-1 text-xs text-(--muted)">
                       {obtained}/{stickers.length}
                     </span>

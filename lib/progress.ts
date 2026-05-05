@@ -37,12 +37,13 @@ export function calcCollectionProgress(
 
 export function filterStickers(
   stickers: StickerWithQuantity[],
-  filter: 'all' | 'missing' | 'complete' | 'repeated'
+  filter: 'all' | 'missing' | 'complete' | 'repeated' | 'special'
 ): StickerWithQuantity[] {
   switch (filter) {
     case 'missing': return stickers.filter(s => s.quantity === 0)
     case 'complete': return stickers.filter(s => s.quantity >= 1)
     case 'repeated': return stickers.filter(s => s.quantity > 1)
+    case 'special': return stickers.filter(s => s.section_id && !s.country_id)
     default: return stickers
   }
 }

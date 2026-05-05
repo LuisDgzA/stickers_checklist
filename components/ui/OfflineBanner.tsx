@@ -1,19 +1,33 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useSyncExternalStore } from 'react'
 import { syncOfflineQueue } from '@/lib/stickers'
 
 type SyncState = 'idle' | 'syncing' | 'done'
 
+function subscribeOnlineStatus(callback: () => void) {
+  window.addEventListener('online', callback)
+  window.addEventListener('offline', callback)
+  return () => {
+    window.removeEventListener('online', callback)
+    window.removeEventListener('offline', callback)
+  }
+}
+
+function getOnlineSnapshot() {
+  return navigator.onLine
+}
+
+function getServerOnlineSnapshot() {
+  return true
+}
+
 export function OfflineBanner() {
-  const [online, setOnline] = useState(true)
+  const online = useSyncExternalStore(subscribeOnlineStatus, getOnlineSnapshot, getServerOnlineSnapshot)
   const [syncState, setSyncState] = useState<SyncState>('idle')
 
   useEffect(() => {
-    setOnline(navigator.onLine)
-
     const handleOnline = async () => {
-      setOnline(true)
       setSyncState('syncing')
       try {
         const count = await syncOfflineQueue()
@@ -29,7 +43,6 @@ export function OfflineBanner() {
     }
 
     const handleOffline = () => {
-      setOnline(false)
       setSyncState('idle')
     }
 

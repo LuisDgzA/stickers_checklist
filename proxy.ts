@@ -1,5 +1,6 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
+import { loginPathForRedirect } from '@/lib/auth-redirect'
 
 export async function proxy(request: NextRequest) {
   let supabaseResponse = NextResponse.next({ request })
@@ -25,11 +26,14 @@ export async function proxy(request: NextRequest) {
 
   const { data: { user } } = await supabase.auth.getUser()
 
-  const isProtected = request.nextUrl.pathname.startsWith('/album')
+  const protectedPaths = ['/album', '/logros', '/perfil']
+  const isProtected = protectedPaths.some(path => request.nextUrl.pathname.startsWith(path))
 
   if (isProtected && !user) {
     const url = request.nextUrl.clone()
-    url.pathname = '/login'
+    const [pathname, search = ''] = loginPathForRedirect(`${request.nextUrl.pathname}${request.nextUrl.search}`).split('?')
+    url.pathname = pathname
+    url.search = search ? `?${search}` : ''
     return NextResponse.redirect(url)
   }
 

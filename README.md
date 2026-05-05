@@ -34,3 +34,13 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+
+## Supabase Existing Remote
+
+If the remote database already exists, run these files in Supabase SQL Editor in this order:
+
+1. `supabase/migrations/003_achievements.sql`
+2. `supabase/migrations/004_profile_display_name.sql`
+3. `supabase/seed_achievements.sql`
+
+The achievements seed is idempotent and is also included at the end of `supabase/seed.sql` for fresh local databases.
