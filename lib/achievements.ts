@@ -102,6 +102,35 @@ export function detectAchievementCodes({
   return Array.from(codes).filter(code => !unlockedCodes.has(code))
 }
 
+export function detectExistingAchievements({
+  stickers,
+  countries,
+  groups,
+  unlockedCodes,
+}: {
+  stickers: StickerWithQuantity[]
+  countries: Country[]
+  groups: Group[]
+  unlockedCodes: Set<string>
+}): string[] {
+  const codes = new Set<string>()
+  const obtained = stickers.filter(s => s.quantity >= 1).length
+  const pct = percentage(stickers)
+  const hasDuplicate = stickers.some(s => s.quantity > 1)
+
+  if (obtained >= 1) codes.add('first_sticker')
+  if (pct >= 5)   codes.add('album_5_percent')
+  if (pct >= 25)  codes.add('album_25_percent')
+  if (pct >= 50)  codes.add('album_50_percent')
+  if (pct >= 75)  codes.add('album_75_percent')
+  if (pct >= 100) { codes.add('album_complete'); codes.add('last_sticker') }
+  if (completedCountryCount(stickers, countries) >= 1) codes.add('first_team_completed')
+  if (completedGroupCount(stickers, countries, groups) >= 1) codes.add('first_group_completed')
+  if (hasDuplicate) { codes.add('first_duplicate'); codes.add('market_open') }
+
+  return Array.from(codes).filter(code => !unlockedCodes.has(code))
+}
+
 export async function unlockAchievements(
   userId: string,
   collectionId: string,

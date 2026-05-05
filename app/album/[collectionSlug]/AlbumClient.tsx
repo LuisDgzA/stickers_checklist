@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo, useCallback } from 'react'
+import { useState, useMemo, useCallback, useEffect, useRef } from 'react'
 import { useConfetti } from '@/hooks/useConfetti'
 import { StatsBar } from '@/components/progress/StatsBar'
 import { FilterBar } from '@/components/album/FilterBar'
@@ -14,7 +14,7 @@ import { ThemeToggle } from '@/components/ui/ThemeToggle'
 import { calcCollectionProgress } from '@/lib/progress'
 import { updateStickerQuantity, MIN_QUANTITY, MAX_QUANTITY } from '@/lib/stickers'
 import { getOrCreateShareLink, getShareUrl } from '@/lib/share'
-import { detectAchievementCodes, unlockAchievements, type AchievementDefinition } from '@/lib/achievements'
+import { detectAchievementCodes, detectExistingAchievements, unlockAchievements, type AchievementDefinition } from '@/lib/achievements'
 import type { Collection, Group, Country, Section, StickerWithQuantity, StickerFilter } from '@/types/album'
 import Link from 'next/link'
 
@@ -109,6 +109,31 @@ export function AlbumClient({ user, collection, groups, countries, sections, sti
       window.setTimeout(() => dismissToast(toast.id), toast.type === 'achievement' ? 6000 : 4500)
     })
   }, [dismissToast])
+
+  const initialCheckDone = useRef(false)
+  useEffect(() => {
+    if (initialCheckDone.current) return
+    initialCheckDone.current = true
+
+    const existing = detectExistingAchievements({ stickers: initial, countries, groups, unlockedCodes })
+    if (existing.length === 0) return
+
+    unlockAchievements(user.id, collection.id, existing).then(newAchievements => {
+      if (newAchievements.length === 0) return
+      fireConfetti()
+      setUnlockedCodes(prev => {
+        const next = new Set(prev)
+        newAchievements.forEach(a => next.add(a.code))
+        return next
+      })
+      newAchievements.forEach((achievement: AchievementDefinition, i) => {
+        window.setTimeout(() => {
+          addFeedbackToasts([{ type: 'achievement', title: achievement.name, description: achievement.description, icon: achievement.icon } as Omit<FeedbackToast, 'id'>])
+        }, i * 800)
+      })
+    })
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   const updateQuantity = useCallback(async (stickerId: string, delta: number) => {
     const current = stickers.find(s => s.id === stickerId)
