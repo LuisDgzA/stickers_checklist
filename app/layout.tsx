@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import { Inter } from 'next/font/google'
+import { Fredoka } from 'next/font/google'
 import { ThemeProvider } from '@/components/ui/ThemeProvider'
 import { PwaSetup } from '@/components/ui/PwaSetup'
 import { OfflineBanner } from '@/components/ui/OfflineBanner'
@@ -7,7 +7,7 @@ import { DEFAULT_DESCRIPTION, DEFAULT_TITLE, SITE_NAME, SITE_URL } from '@/lib/s
 import './globals.css'
 import 'flag-icons/css/flag-icons.min.css'
 
-const inter = Inter({ subsets: ['latin'] })
+const fredoka = Fredoka({ subsets: ['latin'], weight: ['300', '400', '500', '600', '700'] })
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
@@ -52,6 +52,9 @@ export const metadata: Metadata = {
     title: DEFAULT_TITLE,
     description: DEFAULT_DESCRIPTION,
   },
+  icons: {
+    apple: '/icons/completalo_icono_app_oscuro_512.png',
+  },
   appleWebApp: {
     capable: true,
     title: SITE_NAME,
@@ -65,7 +68,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="es" suppressHydrationWarning>
-      <body className={`${inter.className} bg-[var(--bg)] text-[var(--text)] min-h-screen`} suppressHydrationWarning>
+      <body className={`${fredoka.className} bg-[var(--bg)] text-[var(--text)] min-h-screen`} suppressHydrationWarning>
         <ThemeProvider>
           {children}
           <OfflineBanner />

@@ -44,7 +44,7 @@ export function ShareAlbumButton({ userId, collectionId, className = '' }: Share
         <svg className="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342A3 3 0 109 12m-.316 1.342l6.632 3.316m-6.632-6l6.632-3.316M18 8a3 3 0 100-6 3 3 0 000 6zm0 14a3 3 0 100-6 3 3 0 000 6z" />
         </svg>
-        {isLoading ? 'Generando...' : 'Compartir álbum'}
+        {isLoading ? 'Generando...' : 'Compartir'}
       </button>
 
       {shareUrl && (

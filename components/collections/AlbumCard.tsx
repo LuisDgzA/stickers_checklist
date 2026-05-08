@@ -28,9 +28,6 @@ export function AlbumCard({ collection, progress, userId = null, featured = fals
           <span className="rounded-full border border-(--accent)/30 bg-(--accent)/10 px-3 py-1 text-xs font-semibold text-(--accent)">
             {percentage === 100 ? 'Completado' : percentage > 0 ? 'En progreso' : 'Disponible'}
           </span>
-          <span className="rounded-full border border-(--border) bg-(--surface-soft) px-3 py-1 text-xs font-medium text-(--muted)">
-            Colección
-          </span>
         </div>
 
         <div className="mt-5 overflow-hidden rounded-2xl border border-white/20 bg-(--surface-soft) shadow-inner">
@@ -44,10 +41,14 @@ export function AlbumCard({ collection, progress, userId = null, featured = fals
               />
             ) : (
               <div className="flex h-full w-full items-center justify-center bg-[linear-gradient(135deg,var(--primary),var(--accent))]">
-                <svg className="size-16 text-white/90" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M6 4h12v7a6 6 0 11-12 0V4z" />
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 21h8M12 17v4M18 6h2a2 2 0 010 4h-2M6 6H4a2 2 0 000 4h2" />
-                </svg>
+                {collection.emojis ? (
+                  <span className="select-none text-7xl drop-shadow-lg" aria-hidden="true">{collection.emojis}</span>
+                ) : (
+                  <svg className="size-16 text-white/90" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M6 4h12v7a6 6 0 11-12 0V4z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 21h8M12 17v4M18 6h2a2 2 0 010 4h-2M6 6H4a2 2 0 000 4h2" />
+                  </svg>
+                )}
               </div>
             )}
           </div>

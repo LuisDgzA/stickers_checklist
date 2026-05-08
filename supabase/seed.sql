@@ -14,9 +14,9 @@ DECLARE
   sticker_num INTEGER;
 BEGIN
   -- Collection
-  INSERT INTO public.collections (name, slug, description, is_active)
-  VALUES ('Mundial 2026', 'mundial-2026', 'Álbum oficial del Mundial de Fútbol 2026', true)
-  ON CONFLICT (slug) DO UPDATE SET name = EXCLUDED.name
+  INSERT INTO public.collections (name, slug, description, is_active, emojis)
+  VALUES ('Mundial 2026', 'mundial-2026', 'Álbum oficial del Mundial de Fútbol 2026', true, '⚽🌍')
+  ON CONFLICT (slug) DO UPDATE SET name = EXCLUDED.name, emojis = EXCLUDED.emojis
   RETURNING id INTO col_id;
 
   -- Sections
