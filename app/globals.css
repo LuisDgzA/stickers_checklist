@@ -4,76 +4,76 @@
 :root {
   --bg:             #f5f7fb;
   --surface:        #ffffff;
-  --surface-soft:   #f0f4f8;
-  --surface-strong: #e8eef8;
-  --surface-hover:  #eef4ff;
-  --border:         #d7deea;
-  --border-hover:   #a9b7cc;
-  --text:           #101828;
+  --surface-soft:   #f5f0ff;
+  --surface-strong: #ebe4ff;
+  --surface-hover:  #f0ecff;
+  --border:         #d9d4f0;
+  --border-hover:   #b0a8d8;
+  --text:           #22223B;
   --muted:          #667085;
-  --primary:        #d61f3c;
-  --primary-hover:  #bd1731;
-  --accent:         #008f7a;
-  --accent-hover:   #00a990;
-  --amber:          #b7791f;
-  --focus:          #12b8a6;
-  --hero-glow:      rgba(0 143 122 / 0.18);
-  --hero-glow-secondary: rgba(214 31 60 / 0.14);
-  --progress-glow:  rgba(0 143 122 / 0.35);
+  --primary:        #5B5FEF;
+  --primary-hover:  #4A4EE0;
+  --accent:         #20C7BD;
+  --accent-hover:   #18B0A8;
+  --amber:          #FFD43B;
+  --focus:          #20C7BD;
+  --hero-glow:           rgba(91 95 239 / 0.15);
+  --hero-glow-secondary: rgba(32 199 189 / 0.12);
+  --progress-glow:       rgba(32 199 189 / 0.35);
 
-  --sticker-missing-bg:      rgba(208 216 240 / 0.35);
-  --sticker-missing-border:  #cdd5f0;
-  --sticker-missing-text:    #6670a0;
+  --sticker-missing-bg:      rgba(208 210 255 / 0.35);
+  --sticker-missing-border:  #c8caee;
+  --sticker-missing-text:    #6468b0;
 
-  --sticker-obtained-bg:     rgba(0 143 122 / 0.12);
-  --sticker-obtained-border: rgba(0 143 122 / 0.45);
-  --sticker-obtained-text:   #007a72;
-  --sticker-obtained-shadow: rgba(0 143 122 / 0.14);
+  --sticker-obtained-bg:     rgba(30, 180, 170, 0.16);
+  --sticker-obtained-border: rgba(32, 169, 160, 0.642);
+  --sticker-obtained-text:   #138F8A;
+  --sticker-obtained-shadow: rgba(32 199 189 / 0.14);
 
-  --sticker-repeated-bg:     rgba(214 31 60 / 0.1);
-  --sticker-repeated-border: rgba(214 31 60 / 0.4);
-  --sticker-repeated-text:   #a01020;
-  --sticker-repeated-shadow: rgba(214 31 60 / 0.14);
+  --sticker-repeated-bg:     rgba(255 107 107 / 0.10);
+  --sticker-repeated-border: rgba(255 107 107 / 0.40);
+  --sticker-repeated-text:   #cc3344;
+  --sticker-repeated-shadow: rgba(255 107 107 / 0.14);
 
-  --progress-track:          #d7deea;
+  --progress-track:          #ddd8f8;
 }
 
 /* ── Dark theme ────────────────────────────────────────── */
 .dark {
-  --bg:             #070b13;
+  --bg:             #070B2F;
   --surface:        #0f1624;
   --surface-soft:   #121b2b;
   --surface-strong: #182235;
   --surface-hover:  #162033;
   --border:         #263247;
   --border-hover:   #3a4962;
-  --text:           #f8fafc;
+  --text:           #E9ECFF;
   --muted:          #9aa7b8;
-  --primary:        #f43f5e;
-  --primary-hover:  #fb7185;
-  --accent:         #2dd4bf;
-  --accent-hover:   #5eead4;
-  --amber:          #f5a623;
-  --focus:          #5eead4;
-  --hero-glow:      rgba(45 212 191 / 0.16);
-  --hero-glow-secondary: rgba(244 63 94 / 0.14);
-  --progress-glow:  rgba(45 212 191 / 0.45);
+  --primary:        #7B7FFF;
+  --primary-hover:  #9194FF;
+  --accent:         #20C7BD;
+  --accent-hover:   #3DD9D0;
+  --amber:          #FFD43B;
+  --focus:          #20C7BD;
+  --hero-glow:           rgba(91 95 239 / 0.22);
+  --hero-glow-secondary: rgba(32 199 189 / 0.15);
+  --progress-glow:       rgba(32 199 189 / 0.45);
 
-  --sticker-missing-bg:      rgba(10 15 46 / 0.7);
-  --sticker-missing-border:  #1e2550;
-  --sticker-missing-text:    #8891bb;
+  --sticker-missing-bg:      rgba(7 11 47 / 0.75);
+  --sticker-missing-border:  #1e2560;
+  --sticker-missing-text:    #8891cc;
 
-  --sticker-obtained-bg:     rgba(0 80 74 / 0.25);
-  --sticker-obtained-border: rgba(0 196 180 / 0.4);
-  --sticker-obtained-text:   #00e0cc;
-  --sticker-obtained-shadow: rgba(45 212 191 / 0.18);
+  --sticker-obtained-bg:     rgba(30, 180, 170, 0.16);
+  --sticker-obtained-border: rgba(32, 169, 160, 0.642);
+  --sticker-obtained-text:   #20C7BD;
+  --sticker-obtained-shadow: rgba(32 199 189 / 0.18);
 
-  --sticker-repeated-bg:     rgba(100 10 20 / 0.25);
-  --sticker-repeated-border: rgba(232 37 61 / 0.4);
+  --sticker-repeated-bg:     rgba(255 107 107 / 0.15);
+  --sticker-repeated-border: rgba(255 107 107 / 0.40);
   --sticker-repeated-text:   #ff9aaa;
-  --sticker-repeated-shadow: rgba(244 63 94 / 0.18);
+  --sticker-repeated-shadow: rgba(255 107 107 / 0.18);
 
-  --progress-track:          #1e2550;
+  --progress-track:          #1e2565;
 }
 
 @layer utilities {

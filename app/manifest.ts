@@ -12,9 +12,9 @@ export default function manifest(): MetadataRoute.Manifest {
     theme_color: '#008f7a',
     categories: ['lifestyle', 'sports', 'utilities'],
     icons: [
-      { src: '/icons/icon-192.png', sizes: '192x192', type: 'image/png' },
-      { src: '/icons/icon-512.png', sizes: '512x512', type: 'image/png' },
-      { src: '/icons/icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
+      { src: '/icons/completalo_icono_app_oscuro_512.png', sizes: '192x192', type: 'image/png' },
+      { src: '/icons/completalo_icono_app_oscuro_512.png', sizes: '512x512', type: 'image/png' },
+      { src: '/icons/completalo_icono_app_oscuro_512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
     ],
   }
 }

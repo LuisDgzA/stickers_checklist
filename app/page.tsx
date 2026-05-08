@@ -6,6 +6,7 @@ import { AlbumGrid, type AlbumGridItem } from '@/components/collections/AlbumGri
 import { EmptyState } from '@/components/ui/EmptyState'
 import { SectionHeader } from '@/components/home/SectionHeader'
 import { ThemeToggle } from '@/components/ui/ThemeToggle'
+import { ThemedLogo } from '@/components/ui/ThemedLogo'
 import { DEFAULT_DESCRIPTION, DEFAULT_TITLE, SITE_NAME, SITE_URL, collectionKeywords } from '@/lib/seo'
 import type { Metadata } from 'next'
 import Link from 'next/link'
@@ -119,17 +120,8 @@ export default async function HomePage() {
 
       <nav className="sticky top-0 z-20 border-b border-(--border) bg-(--bg)/85 px-4 py-3 backdrop-blur-xl">
         <div className="mx-auto flex max-w-6xl items-center justify-between gap-4">
-          <Link href="/" className="flex items-center gap-3 rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--focus)">
-            <span className="grid size-9 place-items-center rounded-2xl bg-[linear-gradient(135deg,var(--primary),var(--accent))] text-white shadow-lg shadow-(--accent)/15">
-              <svg className="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 7a2 2 0 012-2h12a2 2 0 012 2v10a2 2 0 01-2 2H6a2 2 0 01-2-2V7z" />
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 9h8M8 13h5" />
-              </svg>
-            </span>
-            <div>
-              <h1 className="text-sm font-bold tracking-tight text-(--text)">stickers_checklist</h1>
-              <p className="hidden text-xs text-(--muted) sm:block">Álbumes digitales</p>
-            </div>
+          <Link href="/" className="rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--focus)">
+            <ThemedLogo />
           </Link>
 
           <div className="flex items-center gap-2">
@@ -161,9 +153,6 @@ export default async function HomePage() {
       <main className="mx-auto w-full max-w-6xl px-4 py-8 sm:py-12">
         <section className="mb-8 grid gap-6 lg:grid-cols-[1.2fr_0.8fr] lg:items-end">
           <div>
-            <span className="inline-flex items-center rounded-full border border-(--accent)/30 bg-(--accent)/10 px-3 py-1 text-xs font-semibold text-(--accent)">
-              Plataforma de colecciones
-            </span>
             <h1 className="mt-4 max-w-3xl text-4xl font-bold tracking-tight text-(--text) sm:text-5xl">
               Tus álbumes, progreso y cambios en un solo lugar.
             </h1>

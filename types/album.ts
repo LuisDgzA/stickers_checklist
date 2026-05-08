@@ -4,6 +4,7 @@ export interface Collection {
   slug: string
   description: string | null
   cover_image_url: string | null
+  emojis: string | null
   is_active: boolean
 }
 
