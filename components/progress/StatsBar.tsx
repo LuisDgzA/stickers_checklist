@@ -36,12 +36,14 @@ export function StatsBar({ progress, collectionName }: StatsBarProps) {
           <StatItem label="Duplicados" value={progress.duplicates} color="text-(--amber)" />
         </div>
 
-        <div className="mt-4 rounded-2xl border border-(--border) bg-(--surface-soft) px-4 py-3">
-          <span className="text-sm text-(--muted)">
-            Países completos: <span className="font-semibold text-(--accent)">{progress.completedCountries}</span>
-            <span className="opacity-60"> / {progress.totalCountries}</span>
-          </span>
-        </div>
+        {progress.totalCountries > 0 && (
+          <div className="mt-4 rounded-2xl border border-(--border) bg-(--surface-soft) px-4 py-3">
+            <span className="text-sm text-(--muted)">
+              Países completos: <span className="font-semibold text-(--accent)">{progress.completedCountries}</span>
+              <span className="opacity-60"> / {progress.totalCountries}</span>
+            </span>
+          </div>
+        )}
       </div>
     </section>
   )

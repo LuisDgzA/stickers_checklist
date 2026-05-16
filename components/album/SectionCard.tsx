@@ -3,7 +3,7 @@
 import { useMemo, useState } from 'react'
 import { StickerCard } from './StickerCard'
 import { ProgressBar } from '@/components/ui/ProgressBar'
-import { filterStickers, searchStickers } from '@/lib/progress'
+import { filterStickers, searchStickers, sortStickersForDisplay } from '@/lib/progress'
 import type { Section, StickerWithQuantity, StickerFilter } from '@/types/album'
 
 interface SectionCardProps {
@@ -34,7 +34,7 @@ export function SectionCard({
   const visibleStickers = useMemo(() => {
     let result = filterStickers(stickers, filter)
     result = searchStickers(result, searchQuery)
-    return result
+    return sortStickersForDisplay(result)
   }, [stickers, filter, searchQuery])
 
   if (visibleStickers.length === 0 && (filter !== 'all' || searchQuery.trim())) return null
@@ -63,7 +63,7 @@ export function SectionCard({
                 )}
               </div>
               <p className="mt-1 text-xs text-(--muted)">
-                {obtained}/{total} estampas · {percentage}%
+                {obtained}/{total} elementos · {percentage}%
               </p>
             </div>
           </div>
@@ -89,7 +89,7 @@ export function SectionCard({
         <div className="border-t border-(--border) bg-(--surface-soft)/60 px-4 pb-4 pt-4 sm:px-5">
           {visibleStickers.length === 0 ? (
             <p className="rounded-2xl border border-dashed border-(--border) bg-(--surface) py-8 text-center text-sm text-(--muted)">
-              No hay estampas con este filtro.
+              No hay elementos con este filtro.
             </p>
           ) : (
             <div className="grid grid-cols-2 gap-3 min-[420px]:grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8">

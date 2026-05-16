@@ -1,4 +1,4 @@
-INSERT INTO public.achievements (code, name, description, icon, sort_order)
+INSERT INTO public.achievements (code, title, description, category, sort_order)
 VALUES
   ('first_sticker', 'Primer sticker', 'Marcaste tu primera estampa.', 'sparkles', 10),
   ('album_5_percent', 'Ya empezó la colección', 'Completaste el 5% del álbum.', 'progress-5', 20),
@@ -10,10 +10,10 @@ VALUES
   ('first_team_completed', 'Primer equipo completado', 'Completaste tu primer país o equipo.', 'shield', 80),
   ('first_group_completed', 'Primer grupo completado', 'Completaste todos los países de un grupo.', 'grid', 90),
   ('first_duplicate', 'Primer repetido', 'Registraste tu primer sticker repetido.', 'copy', 100),
-  ('market_open', 'Mercado abierto', 'Ya tienes repetidas para intercambiar.', 'swap', 110)
+  ('market_open', 'Mercado abierto', 'Ya tienes repetidas para intercambiar.', 'swap', 110),
+  ('special_complete', 'Colección élite', 'Conseguiste todas las estampas especiales.', 'star', 120)
 ON CONFLICT (code) DO UPDATE SET
-  name = EXCLUDED.name,
+  title = EXCLUDED.title,
   description = EXCLUDED.description,
-  icon = EXCLUDED.icon,
-  sort_order = EXCLUDED.sort_order,
-  updated_at = NOW();
+  category = EXCLUDED.category,
+  sort_order = EXCLUDED.sort_order;

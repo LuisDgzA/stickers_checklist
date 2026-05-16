@@ -1,35 +1,18 @@
-import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 import { loginPathForRedirect } from '@/lib/auth-redirect'
 
-export async function proxy(request: NextRequest) {
-  let supabaseResponse = NextResponse.next({ request })
+const protectedPaths = ['/logros', '/perfil']
 
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        getAll() {
-          return request.cookies.getAll()
-        },
-        setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value))
-          supabaseResponse = NextResponse.next({ request })
-          cookiesToSet.forEach(({ name, value, options }) =>
-            supabaseResponse.cookies.set(name, value, options)
-          )
-        },
-      },
-    }
-  )
+function hasValidSession(request: NextRequest): boolean {
+  // Optimistic check: look for a Supabase auth cookie without making a network call.
+  // Real validation happens in each Server Component via supabase.auth.getUser().
+  return request.cookies.getAll().some(({ name }) => name.startsWith('sb-') && name.includes('-auth-token'))
+}
 
-  const { data: { user } } = await supabase.auth.getUser()
-
-  const protectedPaths = ['/album', '/logros', '/perfil']
+export function proxy(request: NextRequest) {
   const isProtected = protectedPaths.some(path => request.nextUrl.pathname.startsWith(path))
 
-  if (isProtected && !user) {
+  if (isProtected && !hasValidSession(request)) {
     const url = request.nextUrl.clone()
     const [pathname, search = ''] = loginPathForRedirect(`${request.nextUrl.pathname}${request.nextUrl.search}`).split('?')
     url.pathname = pathname
@@ -37,7 +20,7 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(url)
   }
 
-  return supabaseResponse
+  return NextResponse.next()
 }
 
 export const config = {

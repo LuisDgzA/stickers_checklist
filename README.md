@@ -41,6 +41,11 @@ If the remote database already exists, run these files in Supabase SQL Editor in
 
 1. `supabase/migrations/003_achievements.sql`
 2. `supabase/migrations/004_profile_display_name.sql`
-3. `supabase/seed_achievements.sql`
+3. `supabase/migrations/005_hub_home_tutorial_seen.sql`
+4. `supabase/seed_achievements.sql`
 
 The achievements seed is idempotent and is also included at the end of `supabase/seed.sql` for fresh local databases.
+
+## Security
+
+Endpoint classification and current API controls are documented in `docs/security-endpoints.md`.

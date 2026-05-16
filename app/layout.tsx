@@ -18,13 +18,13 @@ export const metadata: Metadata = {
   },
   description: DEFAULT_DESCRIPTION,
   keywords: [
-    'stickers checklist',
+    'completalo.app',
+    'checklist de colecciones',
     'álbum digital',
-    'checklist de stickers',
+    'checklist de coleccionables',
     'coleccionables',
-    'estampas',
-    'intercambio de stickers',
-    'QR de álbum',
+    'intercambio de coleccionables',
+    'QR de colección',
   ],
   alternates: { canonical: '/' },
   manifest: '/manifest.webmanifest',
@@ -53,6 +53,11 @@ export const metadata: Metadata = {
     description: DEFAULT_DESCRIPTION,
   },
   icons: {
+    icon: [
+      { url: '/icons/completalo_icono_app_oscuro_512.png', sizes: '32x32', type: 'image/png' },
+      { url: '/icons/completalo_icono_app_oscuro_512.png', sizes: '192x192', type: 'image/png' },
+    ],
+    shortcut: '/icons/completalo_icono_app_oscuro_512.png',
     apple: '/icons/completalo_icono_app_oscuro_512.png',
   },
   appleWebApp: {
@@ -71,6 +76,25 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className={`${fredoka.className} bg-[var(--bg)] text-[var(--text)] min-h-screen`} suppressHydrationWarning>
         <ThemeProvider>
           {children}
+          <footer className="border-t border-(--border) bg-(--bg) px-4 py-6 text-(--muted)">
+            <div className="mx-auto flex max-w-6xl flex-col items-center justify-center gap-2 text-center text-sm sm:flex-row">
+              <span>Hecho con ❤️ por</span>
+              <a
+                href="https://brosvalley.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center rounded-xl px-2 py-1 transition hover:bg-(--surface-hover) focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--focus)"
+                aria-label="Visitar Bros Valley"
+              >
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src="https://brosvalley.com/_astro/logotipo.C9wBWoss_17U3AP.svg"
+                  alt="Bros Valley"
+                  className="h-6 w-auto transition duration-200 dark:brightness-0 dark:invert [&:not(.dark_*)]:brightness-100 [&:not(.dark_*)]:invert-0"
+                />
+              </a>
+            </div>
+          </footer>
           <OfflineBanner />
         </ThemeProvider>
         <PwaSetup />

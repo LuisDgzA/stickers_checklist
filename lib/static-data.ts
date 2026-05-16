@@ -2,6 +2,8 @@ import { unstable_cache } from 'next/cache'
 import { createClient } from '@/lib/supabase/client'
 import type { Collection, Group, Country, Section, Sticker } from '@/types/album'
 
+const STATIC_REVALIDATE_SECONDS = process.env.NODE_ENV === 'development' ? 1 : 604800
+
 export const getCollections = unstable_cache(
   async (): Promise<Collection[]> => {
     const supabase = createClient()
@@ -14,7 +16,7 @@ export const getCollections = unstable_cache(
     return data
   },
   ['collections'],
-  { tags: ['collections'], revalidate: 604800 }
+  { tags: ['collections'], revalidate: STATIC_REVALIDATE_SECONDS }
 )
 
 export const getCollectionBySlug = unstable_cache(
@@ -30,7 +32,7 @@ export const getCollectionBySlug = unstable_cache(
     return data
   },
   ['collection-by-slug'],
-  { tags: ['collections'], revalidate: 604800 }
+  { tags: ['collections'], revalidate: STATIC_REVALIDATE_SECONDS }
 )
 
 export const getGroups = unstable_cache(
@@ -45,7 +47,7 @@ export const getGroups = unstable_cache(
     return data
   },
   ['groups'],
-  { tags: ['static-data'], revalidate: false }
+  { tags: ['static-data'], revalidate: STATIC_REVALIDATE_SECONDS }
 )
 
 export const getCountries = unstable_cache(
@@ -60,7 +62,7 @@ export const getCountries = unstable_cache(
     return data
   },
   ['countries'],
-  { tags: ['static-data'], revalidate: false }
+  { tags: ['static-data'], revalidate: STATIC_REVALIDATE_SECONDS }
 )
 
 export const getSections = unstable_cache(
@@ -75,7 +77,7 @@ export const getSections = unstable_cache(
     return data
   },
   ['sections'],
-  { tags: ['static-data'], revalidate: false }
+  { tags: ['static-data'], revalidate: STATIC_REVALIDATE_SECONDS }
 )
 
 export const getStickers = unstable_cache(
@@ -101,5 +103,5 @@ export const getStickers = unstable_cache(
     return all
   },
   ['stickers'],
-  { tags: ['static-data'], revalidate: false }
+  { tags: ['static-data'], revalidate: STATIC_REVALIDATE_SECONDS }
 )

@@ -12,7 +12,7 @@ export function GroupNav({ groups, selectedGroupId, onChange }: GroupNavProps) {
   if (groups.length === 0) return null
 
   return (
-    <div className="flex flex-wrap gap-2" aria-label="Grupos">
+    <div data-album-tour="groups" className="flex flex-wrap gap-2" aria-label="Grupos">
       <button
         onClick={() => onChange(null)}
         className={`rounded-xl px-3 py-2 text-sm font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--focus) ${

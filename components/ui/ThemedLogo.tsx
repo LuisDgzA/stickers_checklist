@@ -10,10 +10,10 @@ export function ThemedLogo() {
   const { theme } = useTheme()
   const mounted = useSyncExternalStore(subscribe, () => true, () => false)
 
-  if (!mounted) return <div className="h-9 w-48" />
+  if (!mounted) return <div className="h-9 w-36 sm:w-48" />
 
   return (
-    <div className="relative h-9 w-48">
+    <div className="relative h-9 w-36 sm:w-48">
       <Image
         src={theme === 'dark'
           ? '/icons/completalo_logo_horizontal_oscuro.png'

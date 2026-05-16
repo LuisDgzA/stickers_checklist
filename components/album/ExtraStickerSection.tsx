@@ -117,7 +117,7 @@ export function ExtraStickerSection({
                 )}
               </div>
               <p className="mt-1 text-xs text-(--muted)">
-                {obtained}/{total} estampas · {percentage}%
+                {obtained}/{total} elementos · {percentage}%
               </p>
             </div>
           </div>

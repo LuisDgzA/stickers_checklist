@@ -5,7 +5,7 @@ import { ProgressBar } from '@/components/ui/ProgressBar'
 
 interface AchievementItem {
   code: string
-  name: string
+  title: string
   description: string
   unlockedAt: string | null
 }
@@ -102,7 +102,7 @@ export function AchievementsAccordion({ items, initialCollectionId }: Achievemen
                             </svg>
                           </div>
                           <div className="min-w-0">
-                            <h3 className="font-bold text-(--text)">{achievement.name}</h3>
+                            <h3 className="font-bold text-(--text)">{achievement.title}</h3>
                             <p className="mt-1 text-sm leading-6 text-(--muted)">{achievement.description}</p>
                             <p className={`mt-3 text-xs font-semibold ${unlocked ? 'text-(--primary)' : 'text-(--muted)'}`}>
                               {achievement.unlockedAt ? `Desbloqueado ${new Date(achievement.unlockedAt).toLocaleDateString('es-MX')}` : 'Bloqueado'}

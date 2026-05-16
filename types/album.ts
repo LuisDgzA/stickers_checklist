@@ -97,3 +97,18 @@ export interface MatchResult {
   visitorCanGive: StickerWithQuantity[]
   possibleExchanges: number
 }
+
+export type ExchangeStatus = 'pending' | 'accepted' | 'rejected' | 'cancelled'
+
+export interface ExchangeRequest {
+  id: string
+  collection_id: string
+  requester_id: string
+  owner_id: string
+  requester_gives: string[]
+  owner_gives: string[]
+  status: ExchangeStatus
+  share_token: string
+  created_at: string
+  updated_at: string
+}

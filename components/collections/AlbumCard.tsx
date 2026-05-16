@@ -8,17 +8,37 @@ interface AlbumCardProps {
   progress?: CollectionProgress
   userId?: string | null
   featured?: boolean
+  href?: string
+  cardTutorialTarget?: string
+  openTutorialTarget?: string
+  shareTutorialTarget?: string
+  emphasizeOpenAction?: boolean
+  showShareButton?: boolean
+  fakeShareButton?: boolean
 }
 
-export function AlbumCard({ collection, progress, userId = null, featured = false }: AlbumCardProps) {
+export function AlbumCard({
+  collection,
+  progress,
+  userId = null,
+  featured = false,
+  href,
+  cardTutorialTarget,
+  openTutorialTarget,
+  shareTutorialTarget,
+  emphasizeOpenAction = false,
+  showShareButton = true,
+  fakeShareButton = false,
+}: AlbumCardProps) {
   const percentage = progress?.percentage ?? 0
   const hasProgress = Boolean(progress)
+  const albumHref = href ?? `/album/${collection.slug}`
 
   return (
     <article
-      className={`group relative flex h-full overflow-hidden rounded-3xl border border-(--border) bg-(--surface) shadow-sm transition duration-300 hover:-translate-y-1 hover:border-(--accent)/50 hover:shadow-2xl hover:shadow-(--accent)/10 ${
-        featured ? 'min-h-[360px] sm:col-span-2 lg:col-span-2' : 'min-h-[300px]'
-      }`}
+      data-tutorial={cardTutorialTarget}
+      className={`group relative flex h-full overflow-hidden rounded-3xl border border-(--border) bg-(--surface) shadow-sm transition duration-300 hover:-translate-y-1 hover:border-(--accent)/50 hover:shadow-2xl hover:shadow-(--accent)/10 ${featured ? 'min-h-[360px] sm:col-span-2 lg:col-span-2' : 'min-h-[300px]'
+        }`}
     >
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,var(--hero-glow),transparent_34%),linear-gradient(135deg,var(--surface),var(--surface-strong))]" />
       <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/50 to-transparent opacity-50 dark:via-white/20" />
@@ -75,22 +95,37 @@ export function AlbumCard({ collection, progress, userId = null, featured = fals
           <div className="mt-5">
             <ProgressBar percentage={percentage} />
             <div className="mt-2 flex items-center justify-between text-xs text-(--muted)">
-              <span>{hasProgress ? `${progress?.obtained}/${progress?.total} items` : 'Inicia tu checklist'}</span>
-              <span>{progress?.duplicates ? `${progress.duplicates} repetidas` : 'QR listo'}</span>
+              <span>{hasProgress ? `${progress?.obtained}/${progress?.total} elementos` : 'Inicia tu checklist'}</span>
+              <span>{progress?.duplicates ? `${progress.duplicates} repetidos` : 'QR listo'}</span>
             </div>
           </div>
 
           <div className="mt-5 flex flex-col gap-2 border-t border-(--border) pt-4 sm:flex-row">
             <Link
-              href={`/album/${collection.slug}`}
-              className="inline-flex flex-1 items-center justify-center gap-2 rounded-2xl bg-(--text) px-4 py-2.5 text-sm font-semibold text-(--bg) transition hover:translate-x-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--focus)"
+              href={albumHref}
+              data-tutorial={openTutorialTarget}
+              className={`inline-flex flex-1 items-center justify-center gap-2 rounded-2xl bg-(--text) px-4 py-2.5 text-sm font-semibold text-(--bg) transition hover:translate-x-0.5 data-[tour-active-target=true]:ring-2 data-[tour-active-target=true]:ring-(--accent) data-[tour-active-target=true]:ring-offset-2 data-[tour-active-target=true]:ring-offset-(--surface) data-[tour-active-target=true]:motion-safe:animate-pulse focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--focus) ${emphasizeOpenAction ? 'ring-2 ring-(--accent) ring-offset-2 ring-offset-(--surface) motion-safe:animate-pulse' : ''
+                }`}
             >
               Ver álbum
               <svg className="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 12h14m-6-6l6 6-6 6" />
               </svg>
             </Link>
-            <ShareAlbumButton userId={userId} collectionId={collection.id} className="sm:flex-1" />
+            {fakeShareButton && (
+              <button
+                type="button"
+                data-tutorial={shareTutorialTarget}
+                onClick={event => event.preventDefault()}
+                className="inline-flex items-center justify-center gap-2 rounded-2xl border border-(--border) bg-(--surface-soft) px-4 py-2.5 text-sm font-semibold text-(--text) transition hover:border-(--accent)/40 hover:bg-(--surface-hover) data-[tour-active-target=true]:ring-2 data-[tour-active-target=true]:ring-(--accent) data-[tour-active-target=true]:ring-offset-2 data-[tour-active-target=true]:ring-offset-(--surface) data-[tour-active-target=true]:motion-safe:animate-pulse focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--focus) sm:flex-1"
+              >
+                <svg className="size-4 text-(--accent)" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342A3 3 0 109 12m-.316 1.342 6.632 3.316m-6.632-6 6.632-3.316M18 8a3 3 0 100-6 3 3 0 000 6zm0 14a3 3 0 100-6 3 3 0 000 6z" />
+                </svg>
+                Compartir
+              </button>
+            )}
+            {!fakeShareButton && showShareButton && <ShareAlbumButton userId={userId} collectionId={collection.id} className="sm:flex-1" />}
           </div>
         </div>
       </div>

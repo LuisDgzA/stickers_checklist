@@ -2,22 +2,23 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { AlbumClient } from './AlbumClient'
 import { getCollectionBySlug, getGroups, getCountries, getSections, getStickers, mergeStickersWithQuantity } from '@/lib/collections'
-import { loginPathForRedirect } from '@/lib/auth-redirect'
+import { DEMO_ALBUM_SLUG, demoCollection, demoCountries, demoGroups, demoSections, getDemoStickers } from '@/lib/demo-album'
 import { SITE_NAME, SITE_URL, collectionKeywords, truncateDescription } from '@/lib/seo'
 import type { Metadata } from 'next'
 
 interface PageProps {
   params: Promise<{ collectionSlug: string }>
+  searchParams?: Promise<{ onboarding?: string }>
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { collectionSlug } = await params
-  const collection = await getCollectionBySlug(collectionSlug)
-  const title = collection ? `${collection.name} checklist` : 'Álbum'
+  const collection = collectionSlug === DEMO_ALBUM_SLUG ? demoCollection : await getCollectionBySlug(collectionSlug)
+  const title = collection ? `${collection.name} checklist` : 'Colección'
   const description = truncateDescription(
     collection?.description
-      ? `${collection.description}. Checklist privado para registrar progreso, faltantes y repetidas.`
-      : 'Checklist privado para registrar progreso, faltantes y repetidas.'
+      ? `${collection.description}. Checklist privado para registrar progreso, pendientes y repetidos.`
+      : 'Checklist privado para registrar progreso, pendientes y repetidos.'
   )
 
   return {
@@ -37,25 +38,48 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   }
 }
 
-export default async function AlbumPage({ params }: PageProps) {
+export default async function AlbumPage({ params, searchParams }: PageProps) {
   const { collectionSlug } = await params
+  const query = await searchParams
+  const continueOnboarding = query?.onboarding === 'album'
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
-  if (!user) redirect(loginPathForRedirect(`/album/${collectionSlug}`))
+  if (collectionSlug === DEMO_ALBUM_SLUG) {
+    const demoProfileResult = user
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      ? await (supabase as any).from('profiles').select('nickname').eq('id', user.id).single()
+      : { data: null }
 
-  // Garantiza que el perfil existe (puede no haberse creado si el trigger falló)
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  await (supabase as any).from('profiles').upsert(
-    {
-      id: user.id,
-      email: user.email ?? null,
-      full_name: user.user_metadata?.full_name ?? '',
-      nickname: user.user_metadata?.nickname ?? null,
-      avatar_url: user.user_metadata?.avatar_url ?? null,
-    },
-    { onConflict: 'id', ignoreDuplicates: true }
-  )
+    return (
+      <AlbumClient
+        user={user ? { id: user.id, email: user.email ?? '', nickname: demoProfileResult.data?.nickname ?? user.user_metadata?.nickname ?? user.email ?? '' } : null}
+        collection={demoCollection}
+        groups={demoGroups}
+        countries={demoCountries}
+        sections={demoSections}
+        stickersWithQuantity={getDemoStickers()}
+        unlockedAchievementCodes={[]}
+        mode="sandbox"
+        continueOnboarding={continueOnboarding}
+      />
+    )
+  }
+
+  if (user) {
+    // Garantiza que el perfil existe (puede no haberse creado si el trigger falló)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    await (supabase as any).from('profiles').upsert(
+      {
+        id: user.id,
+        email: user.email ?? null,
+        full_name: user.user_metadata?.full_name ?? '',
+        nickname: user.user_metadata?.nickname ?? null,
+        avatar_url: user.user_metadata?.avatar_url ?? null,
+      },
+      { onConflict: 'id', ignoreDuplicates: true }
+    )
+  }
 
   const collection = await getCollectionBySlug(collectionSlug)
   if (!collection) redirect('/')
@@ -66,11 +90,11 @@ export default async function AlbumPage({ params }: PageProps) {
     getSections(collection.id),
     getStickers(collection.id),
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (supabase as any).from('user_stickers').select('sticker_id, quantity').eq('user_id', user.id).eq('collection_id', collection.id),
+    user ? (supabase as any).from('user_stickers').select('sticker_id, quantity').eq('user_id', user.id).eq('collection_id', collection.id) : Promise.resolve({ data: [] }),
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (supabase as any).from('user_achievements').select('achievement_code').eq('user_id', user.id).eq('collection_id', collection.id),
+    user ? (supabase as any).from('user_achievements').select('achievement_code').eq('user_id', user.id).eq('collection_id', collection.id) : Promise.resolve({ data: [] }),
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (supabase as any).from('profiles').select('nickname').eq('id', user.id).single(),
+    user ? (supabase as any).from('profiles').select('nickname').eq('id', user.id).single() : Promise.resolve({ data: null }),
   ])
 
   const userStickers = userStickersResult.data ?? []
@@ -79,13 +103,15 @@ export default async function AlbumPage({ params }: PageProps) {
 
   return (
     <AlbumClient
-      user={{ id: user.id, email: user.email ?? '', nickname: profileResult.data?.nickname ?? user.email ?? '' }}
+      user={user ? { id: user.id, email: user.email ?? '', nickname: profileResult.data?.nickname ?? user.email ?? '' } : null}
       collection={collection}
       groups={groups}
       countries={countries}
       sections={sections}
       stickersWithQuantity={stickersWithQuantity}
       unlockedAchievementCodes={(achievementsResult.data ?? []).map((row: { achievement_code: string }) => row.achievement_code)}
+      mode={user ? 'authenticated' : 'preview'}
+      continueOnboarding={continueOnboarding}
     />
   )
 }

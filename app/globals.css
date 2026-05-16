@@ -36,6 +36,10 @@
   --sticker-repeated-shadow: rgba(255 107 107 / 0.14);
 
   --progress-track:          #ddd8f8;
+  --sat: env(safe-area-inset-top, 0px);
+  --sar: env(safe-area-inset-right, 0px);
+  --sab: env(safe-area-inset-bottom, 0px);
+  --sal: env(safe-area-inset-left, 0px);
 }
 
 /* ── Dark theme ────────────────────────────────────────── */
@@ -136,6 +140,17 @@
   from {
     opacity: 0;
     transform: translateY(-8px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes tour-card-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.98);
   }
   to {
     opacity: 1;

@@ -1,9 +1,14 @@
 import { AdSlot } from '@/components/ads/AdSlot'
 import { ProgressBar } from '@/components/ui/ProgressBar'
 import { ShareQrPanel } from '@/components/share/ShareQrPanel'
+import { ThemedLogo } from '@/components/ui/ThemedLogo'
+import { ThemeToggle } from '@/components/ui/ThemeToggle'
+import { NotificationBell } from '@/components/ui/NotificationBell'
+import { ResponsiveMenu } from '@/components/ui/ResponsiveMenu'
+import { LogoutButton } from '@/components/auth/LogoutButton'
 import { createClient } from '@/lib/supabase/server'
 import { calcCollectionProgress } from '@/lib/progress'
-import { getCountries, getStickers, mergeStickersWithQuantity } from '@/lib/collections'
+import { getCountries, getSections, getStickers, mergeStickersWithQuantity } from '@/lib/collections'
 import { calcMatchResult } from '@/lib/share'
 import { getOwnerNickname } from '@/lib/profile.server'
 import { FLAG_ICONS } from '@/lib/flags'
@@ -41,8 +46,9 @@ async function getSharedAlbum(token: string) {
   const collection = collectionRaw as Collection | null
   if (!collection) return null
 
-  const [countries, stickers, userStickersResult, ownerNickname] = await Promise.all([
+  const [countries, sections, stickers, userStickersResult, ownerNickname] = await Promise.all([
     getCountries(collection.id),
+    getSections(collection.id),
     getStickers(collection.id),
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (supabase as any).from('user_stickers').select('*').eq('user_id', shareLink.user_id).eq('collection_id', collection.id),
@@ -53,7 +59,7 @@ async function getSharedAlbum(token: string) {
   const stickersWithQuantity = mergeStickersWithQuantity(stickers, userStickers)
   const progress = calcCollectionProgress(stickersWithQuantity, countries)
 
-  return { shareLink, collection, countries, stickers, stickersWithQuantity, progress, ownerNickname }
+  return { shareLink, collection, countries, sections, stickers, stickersWithQuantity, progress, ownerNickname }
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
@@ -61,11 +67,11 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const shared = await getSharedAlbum(token)
   const ownerLabel = shared?.ownerNickname ? `@${shared.ownerNickname}` : null
   const title = shared
-    ? `Álbum de ${ownerLabel ?? 'coleccionista'}: ${shared.collection.name}`
-    : 'Álbum compartido'
+    ? `Colección de ${ownerLabel ?? 'coleccionista'}: ${shared.collection.name}`
+    : 'Colección compartida'
   const description = shared
-    ? truncateDescription(`Consulta el progreso público del álbum ${shared.collection.name}${ownerLabel ? ` de ${ownerLabel}` : ''}: ${shared.progress.percentage}% completado, ${shared.progress.missing} pendientes y ${shared.progress.duplicates} repetidas disponibles para intercambio.`)
-    : 'Consulta un álbum digital compartido en stickers_checklist.'
+    ? truncateDescription(`Consulta el progreso público de ${shared.collection.name}${ownerLabel ? ` de ${ownerLabel}` : ''}: ${shared.progress.percentage}% completado, ${shared.progress.missing} pendientes y ${shared.progress.duplicates} repetidos disponibles para intercambio.`)
+    : `Consulta una colección digital compartida en ${SITE_NAME}.`
   const url = `${SITE_URL}/share/${token}`
 
   return {
@@ -121,19 +127,22 @@ export default async function SharePage({ params }: PageProps) {
     )
   }
 
-  const { shareLink, collection, countries, stickers, stickersWithQuantity, progress, ownerNickname } = shared
+  const { shareLink, collection, countries, sections, stickers, stickersWithQuantity, progress, ownerNickname } = shared
   const ownerLabel = ownerNickname ? `@${ownerNickname}` : 'Este coleccionista'
   const shareUrl = `${SITE_URL}/share/${token}`
   const countryMap = new Map(countries.map(country => [country.id, country]))
-  const grouped = new Map<string, typeof stickersWithQuantity>()
   const duplicateStickers = stickersWithQuantity.filter(sticker => sticker.quantity > 1)
+  const grouped = user ? new Map<string, typeof stickersWithQuantity>() : (() => {
+    const map = new Map<string, typeof stickersWithQuantity>()
+    for (const sticker of stickersWithQuantity) {
+      const key = sticker.country_id ?? 'other'
+      const current = map.get(key) ?? []
+      current.push(sticker)
+      map.set(key, current)
+    }
+    return map
+  })()
   const duplicateGroups = new Map<string, typeof duplicateStickers>()
-  for (const sticker of stickersWithQuantity) {
-    const key = sticker.country_id ?? 'other'
-    const current = grouped.get(key) ?? []
-    current.push(sticker)
-    grouped.set(key, current)
-  }
   for (const sticker of duplicateStickers) {
     const key = sticker.country_id ?? 'other'
     const current = duplicateGroups.get(key) ?? []
@@ -187,32 +196,54 @@ export default async function SharePage({ params }: PageProps) {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <div className="pointer-events-none fixed inset-0 -z-10 bg-[radial-gradient(circle_at_top_left,var(--hero-glow),transparent_34%),radial-gradient(circle_at_80%_0%,var(--hero-glow-secondary),transparent_30%)]" />
 
-      <nav className="border-b border-(--border) bg-(--bg)/85 px-4 py-3 backdrop-blur-xl">
-        <div className="mx-auto flex max-w-6xl items-center justify-between gap-4">
-          <Link href="/" className="text-sm font-semibold text-(--muted) transition hover:text-(--text)">
-            stickers_checklist
+      <nav className="sticky top-0 z-20 border-b border-(--border) bg-(--bg)/85 px-3 py-2.5 backdrop-blur-xl sm:px-4 sm:py-3">
+        <div className="mx-auto flex max-w-6xl items-center justify-between gap-2 sm:gap-4">
+          <Link href="/" className="flex min-w-0 shrink-0 rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--focus)">
+            <ThemedLogo />
           </Link>
-          {!user && (
-            <Link href="/login" className="rounded-xl bg-(--primary) px-4 py-2 text-sm font-semibold text-white">
-              Empieza tu checklist
-            </Link>
-          )}
+
+          <div className="flex items-center gap-2">
+            <NotificationBell />
+
+            {user ? (
+              <>
+                <div className="hidden items-center gap-2 md:flex">
+                  <ThemeToggle />
+                  <Link href="/logros?back=/" className="h-10 shrink-0 rounded-xl border border-(--border) bg-(--surface) px-3 py-2 text-sm font-medium text-(--muted) transition hover:border-(--accent)/50 hover:text-(--text) focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--focus)">
+                    Logros
+                  </Link>
+                  <Link href="/perfil" className="h-10 shrink-0 rounded-xl border border-(--border) bg-(--surface) px-3 py-2 text-sm font-medium text-(--muted) transition hover:border-(--accent)/50 hover:text-(--text) focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--focus)">
+                    Perfil
+                  </Link>
+                  <LogoutButton className="h-10 shrink-0 whitespace-nowrap rounded-xl border border-(--border) bg-(--surface) px-3 py-2 text-sm font-medium text-(--muted) transition hover:border-(--primary)/50 hover:text-(--text) focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--focus) disabled:cursor-wait disabled:opacity-70" />
+                </div>
+
+                <ResponsiveMenu>
+                  <div data-menu-keep-open="true" className="flex items-center justify-between rounded-2xl bg-(--surface-soft) px-3 py-2">
+                    <span className="text-sm font-semibold text-(--muted)">Tema</span>
+                    <ThemeToggle />
+                  </div>
+                  <Link href="/logros?back=/" className="flex min-h-11 items-center rounded-2xl border border-(--border) bg-(--surface) px-3 py-2 text-sm font-semibold text-(--muted) transition hover:border-(--accent)/50 hover:bg-(--surface-hover) hover:text-(--text)">
+                    Logros
+                  </Link>
+                  <Link href="/perfil" className="flex min-h-11 items-center rounded-2xl border border-(--border) bg-(--surface) px-3 py-2 text-sm font-semibold text-(--muted) transition hover:border-(--accent)/50 hover:bg-(--surface-hover) hover:text-(--text)">
+                    Perfil
+                  </Link>
+                  <LogoutButton className="flex min-h-11 w-full items-center rounded-2xl border border-(--border) bg-(--surface) px-3 py-2 text-left text-sm font-semibold text-(--muted) transition hover:border-(--primary)/50 hover:bg-(--surface-hover) hover:text-(--text) disabled:cursor-wait disabled:opacity-70" />
+                </ResponsiveMenu>
+              </>
+            ) : (
+              <Link href="/login" className="rounded-xl bg-(--primary) px-4 py-2 text-sm font-semibold text-white">
+                Empieza tu checklist
+              </Link>
+            )}
+          </div>
         </div>
       </nav>
 
       <main className="mx-auto max-w-6xl space-y-8 px-4 py-8 sm:py-12">
         <section className="grid gap-6 lg:grid-cols-[1.3fr_0.7fr] lg:items-start">
           <div className="rounded-3xl border border-(--border) bg-(--surface) p-6 shadow-xl shadow-black/5">
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="inline-flex rounded-full border border-(--accent)/30 bg-(--accent)/10 px-3 py-1 text-xs font-semibold text-(--accent)">
-                Álbum público · solo lectura
-              </span>
-              {ownerNickname && (
-                <span className="inline-flex rounded-full border border-(--border) bg-(--surface-soft) px-3 py-1 text-xs font-mono text-(--muted)">
-                  {ownerLabel}
-                </span>
-              )}
-            </div>
             {ownerNickname && (
               <p className="mt-4 text-lg font-semibold text-(--text)">
                 Álbum de <span className="text-(--accent)">{ownerLabel}</span>
@@ -242,8 +273,8 @@ export default async function SharePage({ params }: PageProps) {
                 <h2 className="text-lg font-bold text-(--text)">¡Puedes intercambiar!</h2>
                 <p className="mt-2 text-sm leading-6 text-(--muted)">
                   {ownerNickname
-                    ? `${ownerLabel} te puede dar algunas estampas. Más abajo verás los posibles intercambios.`
-                    : 'Más abajo verás qué stickers pueden intercambiarse entre tu colección y la de este usuario.'}
+                    ? `${ownerLabel} tiene algunos repetidos que podrían servirte. Más abajo verás los posibles intercambios.`
+                    : 'Más abajo verás qué elementos pueden intercambiarse entre tu colección y la de este usuario.'}
                 </p>
                 <div className="mt-4 flex flex-col gap-2">
                   <Link href="/" className="rounded-2xl bg-(--accent) px-4 py-3 text-center text-sm font-semibold text-white">Ver mi colección</Link>
@@ -252,11 +283,11 @@ export default async function SharePage({ params }: PageProps) {
               </div>
             ) : (
               <div className="rounded-3xl border border-(--border) bg-(--surface) p-5 shadow-sm">
-                <h2 className="text-lg font-bold text-(--text)">Crea tu propio álbum</h2>
-                <p className="mt-2 text-sm leading-6 text-(--muted)">Guarda una copia, empieza tu checklist y reta a tus amigos a completar el álbum.</p>
+                <h2 className="text-lg font-bold text-(--text)">Crea tu propia colección</h2>
+                <p className="mt-2 text-sm leading-6 text-(--muted)">Guarda una copia, empieza tu checklist y comparte tu avance con otras personas.</p>
                 <div className="mt-4 flex flex-col gap-2">
                   <Link href="/login" className="rounded-2xl bg-(--primary) px-4 py-3 text-center text-sm font-semibold text-white">Empieza tu checklist</Link>
-                  <Link href="/" className="rounded-2xl border border-(--border) bg-(--surface-soft) px-4 py-3 text-center text-sm font-semibold text-(--text)">Ver más álbumes</Link>
+                  <Link href="/" className="rounded-2xl border border-(--border) bg-(--surface-soft) px-4 py-3 text-center text-sm font-semibold text-(--text)">Ver más colecciones</Link>
                 </div>
               </div>
             )}
@@ -267,18 +298,29 @@ export default async function SharePage({ params }: PageProps) {
 
         {matchResult && (
           <section id="intercambios" aria-label="Comparación de intercambios">
-            <MatchClient matchResult={matchResult} ownerName={ownerLabel} countries={countries} embedded />
+            <MatchClient
+              matchResult={matchResult}
+              ownerName={ownerLabel}
+              countries={countries}
+              sections={sections}
+              embedded
+              exchangeContext={showMatch ? {
+                collectionId: collection.id,
+                ownerId: shareLink.user_id,
+                shareToken: token,
+              } : undefined}
+            />
           </section>
         )}
 
-        <section>
+        {!user && <section>
           <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
             <div>
               <h2 className="text-2xl font-bold tracking-tight text-(--text)">Duplicadas disponibles</h2>
               <p className="mt-2 text-sm text-(--muted)">
                 {duplicateStickers.length > 0
-                  ? `${ownerLabel} tiene ${progress.duplicates} repetidas en ${duplicateStickers.length} estampas.`
-                  : `${ownerLabel} todavía no tiene estampas duplicadas.`}
+                  ? `${ownerLabel} tiene ${progress.duplicates} repetidos en ${duplicateStickers.length} elementos.`
+                  : `${ownerLabel} todavía no tiene elementos duplicados.`}
               </p>
             </div>
             <span className="w-fit rounded-full border border-(--accent)/30 bg-(--accent)/10 px-4 py-2 text-sm font-bold text-(--accent)">
@@ -326,47 +368,49 @@ export default async function SharePage({ params }: PageProps) {
               Cuando marque repetidas, aparecerán aquí para facilitar intercambios.
             </div>
           )}
-        </section>
+        </section>}
 
-        <section>
-          <h2 className="text-2xl font-bold tracking-tight text-(--text)">Checklist visible</h2>
-          <div className="mt-5 space-y-4">
-            {Array.from(grouped.entries()).map(([countryId, stickers]) => {
-              const country = countryMap.get(countryId)
-              const obtained = stickers.filter(sticker => sticker.quantity > 0).length
-              return (
-                <article key={countryId} className="rounded-3xl border border-(--border) bg-(--surface) p-5 shadow-sm">
-                  <div className="flex flex-wrap items-center justify-between gap-3">
-                    <h3 className="flex items-center gap-2 font-semibold text-(--text)">
-                      {country && FLAG_ICONS[country.code] && (
-                        <span className={`fi fi-${FLAG_ICONS[country.code]} text-xl`} aria-hidden="true" />
-                      )}
-                      <span>{country?.name ?? 'Sección especial'}</span>
-                    </h3>
-                    <span className="rounded-full border border-(--border) bg-(--surface-soft) px-3 py-1 text-xs text-(--muted)">
-                      {obtained}/{stickers.length}
-                    </span>
-                  </div>
-                  <div className="mt-4 grid grid-cols-2 gap-2 min-[420px]:grid-cols-3 sm:grid-cols-5 md:grid-cols-7 lg:grid-cols-9">
-                    {stickers.map(sticker => (
-                      <div
-                        key={sticker.id}
-                        className={`rounded-2xl border p-3 text-center text-xs ${
-                          sticker.quantity > 0
-                            ? 'border-(--accent)/40 bg-(--accent)/10 text-(--accent)'
-                            : 'border-(--border) bg-(--surface-soft) text-(--muted)'
-                        }`}
-                      >
-                        <div className="font-mono font-bold">{sticker.code}</div>
-                        <div className="mt-1 line-clamp-2 text-[11px]">{sticker.name ?? (sticker.quantity > 0 ? 'Completada' : 'Pendiente')}</div>
-                      </div>
-                    ))}
-                  </div>
-                </article>
-              )
-            })}
-          </div>
-        </section>
+        {!user && (
+          <section>
+            <h2 className="text-2xl font-bold tracking-tight text-(--text)">Checklist visible</h2>
+            <div className="mt-5 space-y-4">
+              {Array.from(grouped.entries()).map(([countryId, stickers]) => {
+                const country = countryMap.get(countryId)
+                const obtained = stickers.filter(sticker => sticker.quantity > 0).length
+                return (
+                  <article key={countryId} className="rounded-3xl border border-(--border) bg-(--surface) p-5 shadow-sm">
+                    <div className="flex flex-wrap items-center justify-between gap-3">
+                      <h3 className="flex items-center gap-2 font-semibold text-(--text)">
+                        {country && FLAG_ICONS[country.code] && (
+                          <span className={`fi fi-${FLAG_ICONS[country.code]} text-xl`} aria-hidden="true" />
+                        )}
+                        <span>{country?.name ?? 'Sección especial'}</span>
+                      </h3>
+                      <span className="rounded-full border border-(--border) bg-(--surface-soft) px-3 py-1 text-xs text-(--muted)">
+                        {obtained}/{stickers.length}
+                      </span>
+                    </div>
+                    <div className="mt-4 grid grid-cols-2 gap-2 min-[420px]:grid-cols-3 sm:grid-cols-5 md:grid-cols-7 lg:grid-cols-9">
+                      {stickers.map(sticker => (
+                        <div
+                          key={sticker.id}
+                          className={`rounded-2xl border p-3 text-center text-xs ${
+                            sticker.quantity > 0
+                              ? 'border-(--accent)/40 bg-(--accent)/10 text-(--accent)'
+                              : 'border-(--border) bg-(--surface-soft) text-(--muted)'
+                          }`}
+                        >
+                          <div className="font-mono font-bold">{sticker.code}</div>
+                          <div className="mt-1 line-clamp-2 text-[11px]">{sticker.name ?? (sticker.quantity > 0 ? 'Completada' : 'Pendiente')}</div>
+                        </div>
+                      ))}
+                    </div>
+                  </article>
+                )
+              })}
+            </div>
+          </section>
+        )}
 
         <AdSlot variant="footer" title="Premium sin anuncios" description="Estructura lista para futuros planes con álbumes privados, estadísticas avanzadas y exportación de progreso." />
       </main>

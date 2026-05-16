@@ -1,7 +1,7 @@
-export const SITE_URL = process.env.NEXT_PUBLIC_APP_URL ?? 'https://stickers-checklist.com'
-export const SITE_NAME = 'stickers_checklist'
-export const DEFAULT_TITLE = 'stickers_checklist | Álbumes digitales, checklist y progreso de stickers'
-export const DEFAULT_DESCRIPTION = 'Crea, completa y comparte álbumes digitales de coleccionables. Sigue tu progreso, detecta repetidas y comparte tu checklist con QR.'
+export const SITE_URL = process.env.NEXT_PUBLIC_APP_URL ?? 'https://completalo.app'
+export const SITE_NAME = 'completalo.app'
+export const DEFAULT_TITLE = 'completalo.app | Hub digital para completar colecciones'
+export const DEFAULT_DESCRIPTION = 'Crea, completa y comparte colecciones digitales. Sigue tu progreso, detecta repetidos y comparte tu avance con QR.'
 
 export function absoluteUrl(path = '/') {
   return new URL(path, SITE_URL).toString()
@@ -14,14 +14,14 @@ export function truncateDescription(value: string, maxLength = 155) {
 
 export function collectionKeywords(collectionName?: string) {
   return [
-    'stickers checklist',
+    'completalo.app',
+    'checklist de colecciones',
     'álbum digital',
-    'checklist de stickers',
-    'estampas coleccionables',
-    'progreso de álbum',
-    'repetidas',
-    'intercambio de stickers',
-    'compartir álbum QR',
-    ...(collectionName ? [collectionName, `${collectionName} checklist`, `${collectionName} stickers`] : []),
+    'coleccionables',
+    'progreso de colección',
+    'repetidos',
+    'intercambio de coleccionables',
+    'compartir colección QR',
+    ...(collectionName ? [collectionName, `${collectionName} checklist`, `${collectionName} colección`] : []),
   ]
 }

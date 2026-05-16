@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="color-scheme" content="light" />
+  <meta name="supported-color-schemes" content="light" />
+  <title>Confirma tu cuenta · completalo.app</title>
+  <style>
+    /* Fuerza modo claro en clientes que lo soporten (Apple Mail, iOS Mail) */
+    :root { color-scheme: light only; }
+
+    /* Logo: oscuro visible por defecto (fondo claro) */
+    .logo-dark { display: block; }
+    .logo-light { display: none; }
+
+    @media (prefers-color-scheme: dark) {
+      /* En dark mode: oculta logo oscuro, muestra logo claro */
+      .logo-dark { display: none !important; }
+      .logo-light { display: block !important; }
+
+      /* Fondos y textos adaptados */
+      .email-bg { background-color: #1e1b2e !important; }
+      .card { background-color: #2d2844 !important; border-color: #4c3d8a !important; }
+      .heading { color: #f3f0ff !important; }
+      .body-text { color: #c4b5fd !important; }
+      .footer-text { color: #7c6fc4 !important; }
+      .divider { border-top-color: #4c3d8a !important; }
+    }
+  </style>
+</head>
+<body style="margin:0;padding:0;background-color:#f5f3ff;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" class="email-bg" style="background-color:#f5f3ff;padding:40px 16px;">
+    <tr>
+      <td align="center">
+        <table width="100%" style="max-width:520px;">
+
+          <!-- Logo -->
+          <tr>
+            <td align="center" style="padding-bottom:28px;">
+              <!-- Logo versión oscura (texto oscuro, para fondo claro) -->
+              <img
+                class="logo-dark"
+                src="https://completalo.app/icons/completalo_logo_horizontal_oscuro.png"
+                alt="completalo.app"
+                width="180"
+                style="display:block;height:auto;border:0;"
+              />
+              <!-- Logo versión clara (texto claro, para fondo oscuro) -->
+              <img
+                class="logo-light"
+                src="https://completalo.app/icons/completalo_logo_horizontal_claro.png"
+                alt="completalo.app"
+                width="180"
+                style="display:none;height:auto;border:0;"
+              />
+            </td>
+          </tr>
+
+          <!-- Card -->
+          <tr>
+            <td class="card" style="background-color:#ffffff;border-radius:20px;border:1px solid #e4e0fb;padding:40px 36px;box-shadow:0 4px 24px rgba(109,40,217,0.06);">
+
+              <!-- Ícono -->
+              <div style="text-align:center;margin-bottom:24px;">
+                <span style="display:inline-block;background-color:rgba(109,40,217,0.12);border:1px solid rgba(139,92,246,0.4);border-radius:50%;width:56px;height:56px;line-height:56px;font-size:26px;text-align:center;">
+                  ✉️
+                </span>
+              </div>
+
+              <!-- Título -->
+              <h2 class="heading" style="margin:0 0 8px;text-align:center;font-size:22px;font-weight:800;color:#1e1b4b;letter-spacing:-0.01em;">
+                Confirma tu cuenta
+              </h2>
+              <p class="body-text" style="margin:0 0 28px;text-align:center;font-size:14px;color:#6b7280;line-height:1.7;">
+                Ya casi estás. Haz clic en el botón para activar tu cuenta y empezar a construir tu colección digital.
+              </p>
+
+              <!-- CTA -->
+              <div style="text-align:center;margin-bottom:28px;">
+                <a href="{{ .ConfirmationURL }}"
+                   style="display:inline-block;background-color:#7c3aed;color:#ffffff;text-decoration:none;font-weight:700;font-size:14px;letter-spacing:0.04em;padding:14px 40px;border-radius:12px;">
+                  Confirmar correo
+                </a>
+              </div>
+
+              <!-- Divider -->
+              <hr class="divider" style="border:none;border-top:1px solid #ede9fe;margin:0 0 20px;" />
+
+              <!-- Fallback -->
+              <p class="body-text" style="margin:0;text-align:center;font-size:12px;color:#9ca3af;line-height:1.7;">
+                Si el botón no funciona, copia y pega este enlace:<br />
+                <a href="{{ .ConfirmationURL }}" style="color:#7c3aed;word-break:break-all;font-size:11px;">
+                  {{ .ConfirmationURL }}
+                </a>
+              </p>
+
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td align="center" style="padding-top:24px;">
+              <p class="footer-text" style="margin:0 0 4px;font-size:11px;color:#9ca3af;">
+                Si no creaste esta cuenta, puedes ignorar este correo.
+              </p>
+              <p class="footer-text" style="margin:0;font-size:11px;color:#c4b5fd;">
+                completalo.app — Tus colecciones en un solo lugar
+              </p>
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>

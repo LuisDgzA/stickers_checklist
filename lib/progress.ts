@@ -48,6 +48,14 @@ export function filterStickers(
   }
 }
 
+export function sortStickersForDisplay(stickers: StickerWithQuantity[]): StickerWithQuantity[] {
+  return [...stickers].sort((a, b) =>
+    a.number - b.number ||
+    a.sort_order - b.sort_order ||
+    a.code.localeCompare(b.code, 'es-MX', { numeric: true })
+  )
+}
+
 export function searchStickers(
   stickers: StickerWithQuantity[],
   query: string
